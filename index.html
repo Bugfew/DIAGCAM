@@ -1089,13 +1089,22 @@
   .photo-zone { margin-top: 12px; }
   .photo-zone-title { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: .8px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
   .photo-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  /* Photos caméras (avant/après) — taille de référence */
   .photo-thumb {
     position: relative; width: 90px; height: 90px;
     border-radius: 6px; overflow: hidden;
     border: 1px solid var(--border); cursor: pointer;
     background: var(--surface2); flex-shrink: 0;
   }
-  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* Photos site & NVR — plus petites */
+  .photo-thumb-sm {
+    position: relative; width: 72px; height: 72px;
+    border-radius: 6px; overflow: hidden;
+    border: 1px solid var(--border); cursor: pointer;
+    background: var(--surface2); flex-shrink: 0;
+  }
+  .photo-thumb img, .photo-thumb-sm img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .photo-thumb-del {
     position: absolute; top: 3px; right: 3px;
     background: rgba(0,0,0,0.7); color: #fff;
@@ -1104,7 +1113,8 @@
     cursor: pointer; display: flex; align-items: center; justify-content: center;
     opacity: 0; transition: opacity .15s;
   }
-  .photo-thumb:hover .photo-thumb-del { opacity: 1; }
+  .photo-thumb:hover .photo-thumb-del,
+  .photo-thumb-sm:hover .photo-thumb-del { opacity: 1; }
   .photo-thumb-label {
     position: absolute; bottom: 0; left: 0; right: 0;
     background: rgba(0,0,0,0.6); color: #fff;
@@ -1119,8 +1129,23 @@
     gap: 4px; font-size: 11px; font-family: var(--sans);
     transition: all .15s; flex-shrink: 0;
   }
-  .photo-add-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.05); }
+  .photo-add-btn-sm {
+    width: 72px; height: 72px; border-radius: 6px;
+    border: 1.5px dashed var(--border); background: transparent;
+    color: var(--text2); cursor: pointer; display: flex;
+    flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px; font-size: 10px; font-family: var(--sans);
+    transition: all .15s; flex-shrink: 0;
+  }
+  .photo-add-btn:hover, .photo-add-btn-sm:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.05); }
   .photo-add-icon { font-size: 20px; }
+
+  /* Fix date/time inputs — prevent overflow on mobile */
+  input[type="date"], input[type="time"] {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
 
   /* Lightbox */
   #photoLightbox {
@@ -1804,7 +1829,7 @@ function renderNVRs() {
   // Render photo zones for each NVR after DOM update
   setTimeout(() => {
     state.nvrs.forEach(nvr => {
-      renderPhotoZone('photos-nvr-' + nvr.id, 'nvr-' + nvr.id, 'NVR');
+      renderPhotoZone('photos-nvr-' + nvr.id, 'nvr-' + nvr.id, 'NVR', true);
     });
   }, 0);
 }
@@ -3595,7 +3620,7 @@ function ouvrirIntervention(id, e) {
   renderCameras();
   updateStats();
   setTimeout(() => {
-    renderPhotoZone('photos-site-general', 'site-general', 'Site');
+    renderPhotoZone('photos-site-general', 'site-general', 'Site', true);
   }, 50);
 
   toggleHistorique();
@@ -4189,19 +4214,21 @@ function renderCarteStats(sites) {
 // state.photos = { 'site-general': [{id,src,label}], 'nvr-{id}-{slot}': [...], 'cam-{id}-avant': [...], 'cam-{id}-apres': [...] }
 if (!state.photos) state.photos = {};
 
-function renderPhotoZone(containerId, photoKey, label) {
+function renderPhotoZone(containerId, photoKey, label, small) {
   const container = document.getElementById(containerId);
   if (!container) return;
   const photos = state.photos[photoKey] || [];
+  const thumbCls = small ? 'photo-thumb-sm' : 'photo-thumb';
+  const addCls   = small ? 'photo-add-btn-sm' : 'photo-add-btn';
 
   container.innerHTML = photos.map((p, i) => `
-    <div class="photo-thumb" onclick="openLightbox('${photoKey}',${i})">
+    <div class="${thumbCls}" onclick="openLightbox('${photoKey}',${i})">
       <img src="${p.src}" alt="${p.label||label}">
       ${p.label ? `<div class="photo-thumb-label">${p.label}</div>` : ''}
       <button class="photo-thumb-del" onclick="deletePhoto(event,'${photoKey}',${i})">✕</button>
     </div>
   `).join('') + `
-    <button class="photo-add-btn" onclick="addPhoto('${photoKey}','${label}',this)">
+    <button class="${addCls}" onclick="addPhoto('${photoKey}','${label}',this)">
       <span class="photo-add-icon">＋</span>
       <span>Photo</span>
     </button>`;
@@ -4247,11 +4274,11 @@ function deletePhoto(e, photoKey, idx) {
 
 function refreshAllPhotoZones() {
   // Site
-  renderPhotoZone('photos-site-general', 'site-general', 'Site');
+  renderPhotoZone('photos-site-general', 'site-general', 'Site', true);
   // NVR zones
   state.nvrs.forEach(nvr => {
     const cid = 'photos-nvr-' + nvr.id;
-    if (document.getElementById(cid)) renderPhotoZone(cid, 'nvr-' + nvr.id, 'NVR');
+    if (document.getElementById(cid)) renderPhotoZone(cid, 'nvr-' + nvr.id, 'NVR', true);
   });
 }
 
@@ -4281,7 +4308,7 @@ document.getElementById('photoLightbox').addEventListener('click', function(e) {
 
 // Init site photo zone on load
 document.addEventListener('DOMContentLoaded', () => {
-  renderPhotoZone('photos-site-general', 'site-general', 'Site');
+  renderPhotoZone('photos-site-general', 'site-general', 'Site', true);
 });
 
 // Init historique state
