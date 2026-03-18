@@ -1144,7 +1144,29 @@
   input[type="date"], input[type="time"] {
     width: 100%;
     min-width: 0;
+    max-width: 100%;
     box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  @media (max-width: 600px) {
+    input[type="date"], input[type="time"] {
+      font-size: 16px !important;
+      padding: 10px 12px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      display: block;
+    }
+    .field {
+      min-width: 0;
+      overflow: hidden;
+    }
+    .form-grid {
+      min-width: 0;
+      overflow: hidden;
+    }
   }
 
   /* Lightbox */
