@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Diagnostic ESSOR — Vidéosurveillance</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
 
@@ -582,14 +583,84 @@
   }
 
   /* RESPONSIVE */
+  /* ===== HEADER BUTTONS ===== */
+  .header-logo { display: flex; align-items: center; }
+  .header-actions { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+
+  .hdr-btn {
+    border-radius: 6px; padding: 6px 11px; font-size: 11px; font-weight: 700;
+    font-family: 'IBM Plex Mono', monospace; cursor: pointer; letter-spacing: 1px;
+    transition: all 0.2s; white-space: nowrap; border: 1px solid;
+  }
+  .hdr-btn-new  { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); color: var(--text); }
+  .hdr-btn-carte { background: rgba(0,212,255,0.12); border-color: rgba(0,212,255,0.3); color: var(--accent); }
+  .hdr-btn-hist  { background: rgba(0,230,118,0.12); border-color: rgba(0,230,118,0.3); color: #00e676; }
+  .hdr-btn-modop { background: rgba(255,170,0,0.12); border-color: rgba(255,170,0,0.3); color: #ffaa00; }
+
   @media (max-width: 600px) {
-    .form-grid { grid-template-columns: 1fr; }
-    .form-grid.cols-3 { grid-template-columns: 1fr 1fr; }
-    .check-grid { grid-template-columns: 1fr; }
-    .nvr-info-grid { grid-template-columns: 1fr 1fr; }
-    .stats-bar { gap: 8px; }
-    .stat-chip { min-width: 60px; padding: 8px 10px; }
-    .stat-val { font-size: 16px; }
+    /* Forms */
+    .form-grid { grid-template-columns: 1fr; gap: 10px; }
+    .form-grid.cols-3 { grid-template-columns: 1fr; }
+    .field label { font-size: 10px; }
+    input, select, textarea {
+      font-size: 16px !important;
+      padding: 10px 12px !important;
+    }
+
+    /* Camera table — horizontal scroll on mobile */
+    .cam-table { display: table; }
+    #camTableContainer { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .cam-table th, .cam-table td { white-space: nowrap; padding: 8px 6px; font-size: 12px; }
+    .cam-table input { width: 90px; font-size: 12px !important; padding: 5px 6px !important; }
+    .cam-table select { font-size: 12px !important; padding: 5px 4px !important; max-width: 90px; }
+
+    /* NVR */
+    .nvr-info-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    /* Actions row */
+    .actions-row { gap: 8px; flex-wrap: wrap; }
+    .actions-row .btn { flex: 1; min-width: 120px; padding: 12px 10px; font-size: 13px; }
+
+    /* Stats bar */
+    .stats-bar { gap: 8px; flex-wrap: wrap; }
+    .stat-chip { min-width: 70px; padding: 10px; }
+    .stat-val { font-size: 20px; }
+
+    /* Modal */
+    .modal { width: 96%; max-width: 100%; padding: 16px 14px; max-height: 90vh; overflow-y: auto; }
+    .check-grid { grid-template-columns: 1fr; gap: 6px; }
+    .check-item { padding: 10px; }
+
+    /* Photos */
+    .photo-thumb { width: 80px; height: 80px; }
+    .photo-add-btn { width: 80px; height: 80px; }
+    .photo-grid { gap: 6px; }
+
+    /* Header */
+    header { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
+    .header-actions { width: 100%; justify-content: space-between; gap: 4px; }
+    .hdr-btn { padding: 8px 10px; font-size: 12px; flex: 1; text-align: center; }
+    .steps-nav { display: none; }
+
+    /* Main */
+    main { padding: 10px; }
+    .card { padding: 14px 12px; margin-bottom: 10px; border-radius: 8px; }
+    .section-header { padding: 10px 0 14px; }
+    .section-title { font-size: 20px; }
+
+    /* Sticky bottom nav */
+    .actions-row {
+      position: sticky; bottom: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 10px 12px;
+      margin: 0 -10px;
+      z-index: 89;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .hdr-btn { font-size: 11px; padding: 7px 6px; }
   }
 
   /* Scrollbar */
@@ -937,12 +1008,251 @@
     padding-top: 16px;
     border-top: 1px solid var(--border);
   }
+
+  /* ===== HISTORIQUE ===== */
+  #historiqueOverlay {
+    display: none; position: fixed; inset: 0;
+    background: var(--bg); z-index: 200; overflow-y: auto;
+  }
+  #historiqueOverlay.open { display: block; }
+
+  .hist-header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 14px 24px; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 10;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .hist-title { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--green); letter-spacing: 2px; }
+  .hist-body { max-width: 960px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  .hist-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 24px; }
+  .hist-stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; text-align: center; }
+  .hist-stat-val { font-family: var(--mono); font-size: 26px; font-weight: 600; line-height: 1; }
+  .hist-stat-lbl { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px; }
+  .hist-stat-green .hist-stat-val { color: var(--green); }
+  .hist-stat-red .hist-stat-val { color: var(--red); }
+  .hist-stat-orange .hist-stat-val { color: var(--orange); }
+  .hist-stat-accent .hist-stat-val { color: var(--accent); }
+
+  .hist-search-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .hist-search-bar input { flex: 1; min-width: 200px; background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 9px 14px; color: var(--text); font-family: var(--sans); font-size: 13px; outline: none; }
+  .hist-search-bar input:focus { border-color: var(--accent); }
+  .hist-search-bar select { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 9px 14px; color: var(--text); font-family: var(--sans); font-size: 13px; outline: none; cursor: pointer; }
+  .hist-search-bar select option { background: var(--surface2); }
+
+  .hist-list { display: flex; flex-direction: column; gap: 10px; }
+  .hist-empty { text-align: center; padding: 60px 20px; color: var(--text2); font-size: 14px; }
+  .hist-empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+  .hist-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; transition: border-color 0.15s; }
+  .hist-card:hover { border-color: var(--text2); }
+
+  .hist-card-head { display: grid; grid-template-columns: auto 1fr auto auto; gap: 12px; align-items: center; padding: 13px 16px; cursor: pointer; }
+  .hist-card-date { font-family: var(--mono); font-size: 11px; color: var(--accent); background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.2); border-radius: 5px; padding: 3px 8px; white-space: nowrap; flex-shrink: 0; }
+  .hist-card-info { min-width: 0; }
+  .hist-card-title { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hist-card-sub { font-size: 11px; color: var(--text2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .hist-score { font-family: var(--mono); font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 6px; flex-shrink: 0; }
+  .hist-score-good { background: rgba(0,230,118,0.12); color: var(--green); }
+  .hist-score-med  { background: rgba(255,170,0,0.12);  color: var(--orange); }
+  .hist-score-bad  { background: rgba(255,61,87,0.12);   color: var(--red); }
+
+  .hist-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .hist-btn { padding: 5px 10px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-family: var(--sans); transition: all 0.15s; white-space: nowrap; }
+  .hist-btn:hover { border-color: var(--text2); }
+  .hist-btn-open { border-color: rgba(0,212,255,0.3); color: var(--accent); }
+  .hist-btn-open:hover { background: rgba(0,212,255,0.08); }
+  .hist-btn-del { border-color: rgba(255,61,87,0.2); color: var(--red); }
+  .hist-btn-del:hover { background: rgba(255,61,87,0.08); }
+
+  .hist-card-body { display: none; padding: 12px 16px 14px; border-top: 1px solid var(--border); background: var(--surface2); }
+  .hist-card.expanded .hist-card-body { display: block; }
+
+  .hist-detail-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .hist-detail-item { font-size: 11px; }
+  .hist-detail-item label { color: var(--text2); display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 2px; }
+  .hist-detail-item span { color: var(--text); font-weight: 500; }
+
+  .hist-cam-pills { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .hist-cam-pill { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-family: var(--mono); border: 1px solid; }
+  .pill-ok   { background: rgba(0,230,118,0.08);  color: var(--green);  border-color: rgba(0,230,118,0.3); }
+  .pill-ko   { background: rgba(255,61,87,0.08);   color: var(--red);    border-color: rgba(255,61,87,0.3); }
+  .pill-warn { background: rgba(255,170,0,0.08);   color: var(--orange); border-color: rgba(255,170,0,0.3); }
+
+  .hist-new-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--green); color: #000; border: none; border-radius: 7px; padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: var(--sans); }
+  .hist-new-btn:hover { background: #00c864; }
+
+  .hist-section-title { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+  /* ===== PHOTOS ===== */
+  .photo-zone { margin-top: 12px; }
+  .photo-zone-title { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: .8px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .photo-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .photo-thumb {
+    position: relative; width: 90px; height: 90px;
+    border-radius: 6px; overflow: hidden;
+    border: 1px solid var(--border); cursor: pointer;
+    background: var(--surface2); flex-shrink: 0;
+  }
+  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photo-thumb-del {
+    position: absolute; top: 3px; right: 3px;
+    background: rgba(0,0,0,0.7); color: #fff;
+    border: none; border-radius: 3px;
+    width: 18px; height: 18px; font-size: 10px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity .15s;
+  }
+  .photo-thumb:hover .photo-thumb-del { opacity: 1; }
+  .photo-thumb-label {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.6); color: #fff;
+    font-size: 9px; padding: 2px 4px; text-align: center;
+    font-family: var(--mono); letter-spacing: .3px;
+  }
+  .photo-add-btn {
+    width: 90px; height: 90px; border-radius: 6px;
+    border: 1.5px dashed var(--border); background: transparent;
+    color: var(--text2); cursor: pointer; display: flex;
+    flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; font-size: 11px; font-family: var(--sans);
+    transition: all .15s; flex-shrink: 0;
+  }
+  .photo-add-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.05); }
+  .photo-add-icon { font-size: 20px; }
+
+  /* Lightbox */
+  #photoLightbox {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.92); z-index: 400;
+    align-items: center; justify-content: center;
+  }
+  #photoLightbox.open { display: flex; }
+  #photoLightbox img { max-width: 90vw; max-height: 88vh; border-radius: 8px; box-shadow: 0 0 60px rgba(0,0,0,.8); }
+  #photoLightbox .lb-close { position: absolute; top: 16px; right: 20px; color: #fff; font-size: 28px; cursor: pointer; background: none; border: none; }
+  #photoLightbox .lb-caption { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,.6); font-size: 12px; font-family: var(--mono); }
+
+
+  /* ===== CARTE ===== */
+  #carteOverlay {
+    display: none; position: fixed; inset: 0;
+    background: var(--bg); z-index: 200; overflow: hidden;
+    flex-direction: column;
+  }
+  #carteOverlay.open { display: flex; }
+
+  .carte-header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 12px 20px; display: flex; align-items: center;
+    justify-content: space-between; gap: 12px; flex-shrink: 0; flex-wrap: wrap;
+    z-index: 10;
+  }
+
+  .carte-title { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--accent); letter-spacing: 2px; }
+
+  .carte-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  .carte-filter-btn {
+    padding: 5px 11px; border-radius: 5px; font-size: 11px; font-weight: 700;
+    cursor: pointer; border: 1px solid var(--border); background: var(--surface2);
+    color: var(--text2); font-family: var(--mono); letter-spacing: 0.5px; transition: all 0.15s;
+  }
+  .carte-filter-btn.active-all    { background: rgba(0,212,255,0.12); color: var(--accent); border-color: rgba(0,212,255,0.3); }
+  .carte-filter-btn.active-ok     { background: rgba(0,230,118,0.12); color: var(--green);  border-color: rgba(0,230,118,0.3); }
+  .carte-filter-btn.active-warn   { background: rgba(255,170,0,0.12); color: var(--orange); border-color: rgba(255,170,0,0.3); }
+  .carte-filter-btn.active-ko     { background: rgba(255,61,87,0.12);  color: var(--red);    border-color: rgba(255,61,87,0.3); }
+
+  .carte-body { flex: 1; display: flex; overflow: hidden; position: relative; }
+
+  #carteMap { flex: 1; height: 100%; }
+
+  /* Leaflet dark override */
+  .leaflet-container { background: #0d0f14 !important; }
+  .leaflet-control-zoom a { background: var(--surface) !important; color: var(--text) !important; border-color: var(--border) !important; }
+  .leaflet-control-zoom a:hover { background: var(--surface2) !important; color: var(--accent) !important; }
+  .leaflet-control-attribution { background: rgba(13,15,20,0.8) !important; color: var(--text2) !important; font-size: 9px !important; }
+  .leaflet-control-attribution a { color: var(--accent) !important; }
+  .leaflet-tile { filter: brightness(0.6) saturate(0.3) hue-rotate(180deg) invert(1); }
+
+  /* Popup custom */
+  .leaflet-popup-content-wrapper {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
+    padding: 0 !important;
+  }
+  .leaflet-popup-content { margin: 0 !important; min-width: 260px; }
+  .leaflet-popup-tip { background: var(--surface) !important; }
+  .leaflet-popup-close-button { color: var(--text2) !important; top: 10px !important; right: 10px !important; font-size: 16px !important; }
+  .leaflet-popup-close-button:hover { color: var(--text) !important; }
+
+  .map-popup { padding: 14px 16px; }
+  .map-popup-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
+  .map-popup-title { font-size: 13px; font-weight: 700; color: var(--text); flex: 1; }
+  .map-popup-score { font-family: var(--mono); font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 5px; }
+  .map-popup-row { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+  .map-popup-row span { color: var(--text); }
+  .map-popup-stats { display: flex; gap: 6px; margin: 10px 0 10px; }
+  .map-popup-stat { flex: 1; text-align: center; background: var(--surface2); border-radius: 6px; padding: 6px 4px; border: 1px solid var(--border); }
+  .map-popup-stat-val { font-family: var(--mono); font-size: 16px; font-weight: 700; }
+  .map-popup-stat-lbl { font-size: 9px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .map-popup-btn { width: 100%; padding: 8px; background: var(--accent); color: #000; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: var(--sans); margin-top: 4px; }
+  .map-popup-btn:hover { background: #00bcd4; }
+
+  /* Panneau latéral */
+  .carte-sidebar {
+    width: 300px; background: var(--surface); border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0;
+  }
+  .carte-sidebar-head { padding: 12px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .carte-sidebar-title { font-family: var(--mono); font-size: 10px; color: var(--text2); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .carte-sidebar-search { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; color: var(--text); font-size: 12px; font-family: var(--sans); outline: none; }
+  .carte-sidebar-search:focus { border-color: var(--accent); }
+
+  .carte-site-list { flex: 1; overflow-y: auto; }
+  .carte-site-item {
+    padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.04);
+    cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 10px;
+  }
+  .carte-site-item:hover { background: var(--surface2); }
+  .carte-site-item.active { background: rgba(0,212,255,0.06); border-left: 2px solid var(--accent); }
+
+  .site-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .site-dot-ok   { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .site-dot-warn { background: var(--orange); box-shadow: 0 0 6px var(--orange); }
+  .site-dot-ko   { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .site-dot-geo  { background: var(--text2); }
+
+  .carte-site-name { font-size: 12px; font-weight: 600; color: var(--text); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .carte-site-addr { font-size: 10px; color: var(--text2); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .carte-site-score { font-family: var(--mono); font-size: 11px; font-weight: 700; flex-shrink: 0; }
+
+  /* Stats barre */
+  .carte-stats-bar {
+    padding: 8px 14px; background: var(--surface2); border-top: 1px solid var(--border);
+    display: flex; gap: 12px; flex-wrap: wrap; flex-shrink: 0;
+  }
+  .carte-mini-stat { font-size: 10px; color: var(--text2); }
+  .carte-mini-stat strong { color: var(--text); font-family: var(--mono); }
+
+  /* Géocodage spinner */
+  .geo-spinner { display: inline-block; width: 10px; height: 10px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 4px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .carte-geocoding-bar { padding: 8px 14px; background: rgba(0,212,255,0.06); border-bottom: 1px solid rgba(0,212,255,0.2); font-size: 11px; color: var(--accent); display: none; align-items: center; gap: 6px; }
+  .carte-geocoding-bar.visible { display: flex; }
+
+  @media (max-width: 700px) {
+    .carte-sidebar { display: none; }
+  }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">
+  <div class="header-logo">
     <div style="display:flex;align-items:center;gap:10px;">
       <div style="width:28px;height:28px;background:rgba(0,212,255,0.15);border-radius:5px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,212,255,0.3);">
         <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><polygon points="10,1 19,5.5 19,14.5 10,19 1,14.5 1,5.5" stroke="#00d4ff" stroke-width="1.5" fill="none"/><polygon points="10,5 15,7.5 15,12.5 10,15 5,12.5 5,7.5" stroke="rgba(0,212,255,0.5)" stroke-width="1" fill="none"/></svg>
@@ -953,8 +1263,11 @@
       </div>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:12px;">
-    <button id="modopBtn" onclick="toggleModop()" style="background:rgba(255,170,0,0.12);border:1px solid rgba(255,170,0,0.3);color:#ffaa00;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;cursor:pointer;letter-spacing:1px;transition:all 0.2s;">📋 MODE OP</button>
+  <div class="header-actions">
+    <button class="hdr-btn hdr-btn-new" onclick="nouvelleIntervention()">＋ NOUVEAU</button>
+    <button class="hdr-btn hdr-btn-carte" onclick="toggleCarte()">🗺</button>
+    <button class="hdr-btn hdr-btn-hist" onclick="toggleHistorique()">🗂</button>
+    <button class="hdr-btn hdr-btn-modop" id="modopBtn" onclick="toggleModop()">📋</button>
     <div class="steps-nav" id="stepsNav"></div>
   </div>
 </header>
@@ -1038,10 +1351,27 @@
       </div>
     </div>
 
+    <div class="card">
+      <div class="card-title">📷 Photos du site</div>
+      <div id="sitePhotosZone">
+        <div class="photo-zone">
+          <div class="photo-zone-title">📍 Local technique / Vue générale</div>
+          <div class="photo-grid" id="photos-site-general"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="actions-row">
       <button class="btn btn-primary" onclick="goToPage(2)">Suivant → Enregistreur</button>
     </div>
   </div>
+
+<!-- LIGHTBOX -->
+<div id="photoLightbox">
+  <button class="lb-close" onclick="closeLightbox()">✕</button>
+  <img id="lbImg" src="" alt="">
+  <div class="lb-caption" id="lbCaption"></div>
+</div>
 
   <!-- PAGE 2: NVR/DVR -->
   <div class="page" id="page2">
@@ -1109,6 +1439,7 @@
               <th style="width:130px">Emplacement</th>
               <th style="width:90px">Type</th>
               <th style="width:80px">Marque</th>
+              <th style="width:110px">NVR / DVR</th>
               <th>État global</th>
               <th style="width:70px">Détail</th>
               <th style="width:36px"></th>
@@ -1168,10 +1499,73 @@
       <button class="btn btn-success" onclick="generateReport()" style="font-size:14px;padding:12px 24px;">
         📄 Générer le rapport PDF
       </button>
-      <button class="btn btn-secondary" onclick="saveData()">💾 Sauvegarder</button>
+      <button class="btn btn-primary" onclick="sauvegarderIntervention()" style="background:var(--green);color:#000;">
+        💾 Sauvegarder dans l'historique
+      </button>
     </div>
   </div>
 </main>
+
+<!-- CARTE OVERLAY -->
+<div id="carteOverlay">
+  <div class="carte-header">
+    <div>
+      <div class="carte-title">🗺 CARTE DES SITES</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:1px;">Sites géolocalisés depuis l'historique</div>
+    </div>
+    <div class="carte-controls">
+      <span style="font-size:10px;color:var(--text2);font-family:var(--mono);">FILTRE :</span>
+      <button class="carte-filter-btn active-all" id="filt-all"  onclick="setFiltreCarteScoped('all')">Tous</button>
+      <button class="carte-filter-btn" id="filt-ok"   onclick="setFiltreCarteScoped('ok')">✓ OK</button>
+      <button class="carte-filter-btn" id="filt-warn" onclick="setFiltreCarteScoped('warn')">⚠ Dégradé</button>
+      <button class="carte-filter-btn" id="filt-ko"   onclick="setFiltreCarteScoped('ko')">✗ KO</button>
+      <button class="modop-close" onclick="toggleCarte()">✕ Fermer</button>
+    </div>
+  </div>
+  <div class="carte-geocoding-bar" id="geoBar">
+    <span class="geo-spinner"></span>
+    <span id="geoBarText">Géocodage des adresses en cours...</span>
+  </div>
+  <div class="carte-body">
+    <div id="carteMap"></div>
+    <div class="carte-sidebar">
+      <div class="carte-sidebar-head">
+        <div class="carte-sidebar-title">Sites — <span id="siteCount">0</span></div>
+        <input type="text" class="carte-sidebar-search" id="carteSidebarSearch" placeholder="Rechercher un site..." oninput="filterSidebarScoped()">
+      </div>
+      <div class="carte-site-list" id="carteSiteList"></div>
+      <div class="carte-stats-bar" id="carteStatsBar"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORIQUE OVERLAY -->
+<div id="historiqueOverlay">
+  <div class="hist-header">
+    <div>
+      <div class="hist-title">🗂 HISTORIQUE DES INTERVENTIONS</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">Sauvegardé localement dans votre navigateur</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <button class="hist-new-btn" onclick="nouvelleIntervention()">+ Nouvelle intervention</button>
+      <button class="modop-close" onclick="toggleHistorique()">✕ Fermer</button>
+    </div>
+  </div>
+  <div class="hist-body">
+    <div class="hist-stats" id="histStats"></div>
+    <div class="hist-search-bar">
+      <input type="text" id="histSearch" placeholder="🔍  Rechercher par bailleur, adresse, technicien..." oninput="renderHistorique()">
+      <select id="histSort" onchange="renderHistorique()">
+        <option value="date_desc">Plus récent d'abord</option>
+        <option value="date_asc">Plus ancien d'abord</option>
+        <option value="score_desc">Meilleur score</option>
+        <option value="score_asc">Score le plus bas</option>
+        <option value="bailleur">Bailleur A→Z</option>
+      </select>
+    </div>
+    <div id="histList" class="hist-list"></div>
+  </div>
+</div>
 
 <!-- MODE OPERATOIRE OVERLAY -->
 <div id="modopOverlay">
@@ -1217,6 +1611,22 @@
         <option value="moyen">Moyen — Zone partiellement couverte</option>
         <option value="critique">Critique — Zone non couverte</option>
       </select>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="photo-zone" style="margin-bottom:14px;">
+      <div class="photo-zone-title">📷 Photos de la caméra</div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:10px;color:var(--text2);margin-bottom:5px;font-family:var(--mono);">AVANT</div>
+          <div class="photo-grid" id="modal-photos-avant"></div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text2);margin-bottom:5px;font-family:var(--mono);">APRÈS</div>
+          <div class="photo-grid" id="modal-photos-apres"></div>
+        </div>
+      </div>
     </div>
 
     <div style="display:flex;gap:10px;justify-content:flex-end;">
@@ -1271,6 +1681,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==================== NAVIGATION ====================
 function goToPage(n) {
   if (n === 4) buildSynthese();
+  if (n === 3) renderCameras(); // Refresh NVR select list
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page' + n).classList.add('active');
   state.currentPage = n;
@@ -1300,11 +1711,15 @@ function addNVR() {
     connexion: '', etatGeneral: '', notes: ''
   });
   renderNVRs();
+  renderCameras(); // Mettre à jour le select NVR dans les caméras
 }
 
 function removeNVR(id) {
   state.nvrs = state.nvrs.filter(n => n.id !== id);
+  // Désassocier les caméras liées à ce NVR
+  state.cameras.forEach(c => { if (String(c.nvrId) === String(id)) c.nvrId = ''; });
   renderNVRs();
+  renderCameras();
 }
 
 function renderNVRs() {
@@ -1318,8 +1733,7 @@ function renderNVRs() {
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
         <span style="font-family:var(--mono);font-size:11px;color:var(--accent);">NVR/DVR #${idx + 1}</span>
         <button class="btn btn-danger btn-sm" onclick="removeNVR(${nvr.id})">✕ Supprimer</button>
-      </div>
-      <div class="nvr-info-grid">
+      </div>      <div class="nvr-info-grid">
         <div class="nvr-chip">
           <label>Marque</label>
           <select onchange="updateNVR(${nvr.id},'marque',this.value)">
@@ -1381,13 +1795,27 @@ function renderNVRs() {
         <label style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;display:block;">Notes</label>
         <textarea style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:8px;font-size:12px;font-family:var(--sans);outline:none;resize:vertical;min-height:50px;" placeholder="Alarmes actives, problèmes réseau, paramètres à noter..." onchange="updateNVR(${nvr.id},'notes',this.value)">${nvr.notes}</textarea>
       </div>
+      <div class="photo-zone" style="margin-top:10px;">
+        <div class="photo-zone-title">📷 Photos NVR/DVR</div>
+        <div class="photo-grid" id="photos-nvr-${nvr.id}"></div>
+      </div>
     </div>
   `).join('');
+  // Render photo zones for each NVR after DOM update
+  setTimeout(() => {
+    state.nvrs.forEach(nvr => {
+      renderPhotoZone('photos-nvr-' + nvr.id, 'nvr-' + nvr.id, 'NVR');
+    });
+  }, 0);
 }
 
 function updateNVR(id, key, val) {
   const nvr = state.nvrs.find(n => n.id === id);
-  if (nvr) nvr[key] = val;
+  if (nvr) {
+    nvr[key] = val;
+    // Rafraîchir la liste caméras pour mettre à jour le select NVR
+    if (key === 'marque' || key === 'modele') renderCameras();
+  }
 }
 
 // ==================== CAMERAS ====================
@@ -1400,7 +1828,8 @@ function addCameras(countOverride) {
       emplacement: '',
       type: '',
       marque: '',
-      etat: '', // ok / ko / warn
+      nvrId: '',
+      etat: '',
       checks: {},
       anomalies: '',
       actions: '',
@@ -1420,13 +1849,22 @@ function removeCamera(id) {
 function renderCameras() {
   const tbody = document.getElementById('camTableBody');
   if (!state.cameras.length) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text2);padding:20px;font-size:13px;">Aucune caméra — Ajouter via le bouton ci-dessus</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text2);padding:20px;font-size:13px;">Aucune caméra — Ajouter via le bouton ci-dessus</td></tr>';
     return;
   }
+
+  // Construire la liste des NVR disponibles pour le select
   tbody.innerHTML = state.cameras.map((cam, idx) => {
     const badgeClass = cam.etat === 'ok' ? 'status-ok' : cam.etat === 'ko' ? 'status-ko' : cam.etat === 'warn' ? 'status-warn' : 'status-na';
     const badgeText = cam.etat === 'ok' ? '✓ OK' : cam.etat === 'ko' ? '✗ KO' : cam.etat === 'warn' ? '⚠ DÉGRADÉ' : '— N/A';
     const hasDetail = cam.anomalies || cam.actions || Object.keys(cam.checks).length > 0;
+
+    const nvrSelectOptions = state.nvrs.length
+      ? state.nvrs.map((nvr, i) => {
+          const label = [nvr.marque, nvr.modele].filter(Boolean).join(' ') || ('NVR/DVR #' + (i+1));
+          return `<option value="${nvr.id}" ${String(cam.nvrId) === String(nvr.id) ? 'selected' : ''}>${label}</option>`;
+        }).join('')
+      : '';
 
     return `<tr>
       <td><span style="font-family:var(--mono);font-size:11px;color:var(--text2);">${String(idx+1).padStart(2,'0')}</span></td>
@@ -1442,6 +1880,12 @@ function renderCameras() {
         <select onchange="updateCam(${cam.id},'marque',this.value)">
           <option value="">--</option>
           ${CAM_MARQUES.map(m => `<option ${cam.marque===m?'selected':''}>${m}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        <select onchange="updateCam(${cam.id},'nvrId',this.value)" style="${!state.nvrs.length ? 'color:var(--text2)' : ''}">
+          <option value="">-- Aucun --</option>
+          ${nvrSelectOptions}
         </select>
       </td>
       <td>
@@ -1467,6 +1911,7 @@ function renderCameras() {
   }).join('');
 
   updateStats();
+
 }
 
 function updateCam(id, key, val) {
@@ -1519,6 +1964,8 @@ function openModal(id) {
   }).join('');
 
   document.getElementById('camModal').classList.add('open');
+  // Render photo zones for this camera
+  setTimeout(() => refreshModalPhotos(), 0);
 }
 
 function cycleCheck(checkId) {
@@ -1663,6 +2110,7 @@ function collectData() {
     },
     nvrs: state.nvrs,
     cameras: state.cameras,
+    photos: state.photos,
     conclusion: val('conclusion'),
     actionsRetour: val('actionsRetour'),
     visaTech: val('visaTech'),
@@ -1717,7 +2165,7 @@ function buildHTMLReport(data) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Rapport de Maintenance — ${data.site.bailleur||'Site'} — ${data.site.date||''}</title>
-<style>
+<\x3cstyle>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -1739,11 +2187,28 @@ body{font-family:'Inter',sans-serif;font-size:10.5pt;color:var(--text);backgroun
 @media print{
   .no-print{display:none!important;}
   body{background:#fff;font-size:9.5pt;}
-  .page-break{page-break-before:always;padding-top:20px;}
+  .page-break{page-break-before:auto;padding-top:0;}
   .avoid-break{page-break-inside:avoid;}
+  .cam-card{page-break-inside:avoid;margin-bottom:6px!important;}
+  .cam-grid{display:block;}
+  .sec{margin-bottom:12px!important;}
+  .body{padding:16px 28px 20px!important;}
+  .cover{page-break-after:avoid;}
+  .score-banner{page-break-after:avoid;padding:12px 28px!important;}
+  .score-banner .kpi{min-width:50px!important;}
+  .info-2col{gap:6px!important;}
+  .info-item{padding:6px 10px!important;}
+  .cam-body{padding:8px 12px!important;}
+  .cam-head{padding:8px 12px!important;}
+  .prio-table td,.prio-table th{padding:5px 8px!important;}
+  .sign-grid{gap:10px!important;}
+  .sign-body{min-height:40px!important;padding:8px!important;}
+  .doc-footer{padding:8px 28px!important;}
+  .sec-title{margin-bottom:8px!important;}
+  .conclusion-box,.actions-box{padding:10px 14px!important;}
 }
 @page{
-  margin:16mm 14mm;
+  margin:12mm 12mm;
   size:A4;
 }
 
@@ -2195,7 +2660,7 @@ body{font-family:'Inter',sans-serif;font-size:10.5pt;color:var(--text);backgroun
 .pbtn-primary{background:#3b82f6;color:#fff;}
 .pbtn-ghost{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);}
 .pbtn-hint{font-size:11px;color:rgba(255,255,255,.4);margin-left:4px;}
-</style>
+\x3c/style>
 </head>
 <body>
 <div class="doc">
@@ -2296,9 +2761,28 @@ body{font-family:'Inter',sans-serif;font-size:10.5pt;color:var(--text);backgroun
             <td>${nvrBadge(nvr.etatGeneral,'Opérationnel','Dégradé','Hors service')}</td>
           </tr>
           ${nvr.notes?`<tr class="notes-row"><td colspan="9">📝 ${nvr.notes}</td></tr>`:''}
+          ${(()=>{
+            const photos = (data.photos||{})['nvr-'+nvr.id]||[];
+            if(!photos.length) return '';
+            return `<tr><td colspan="9" style="padding:10px 12px;background:#fafafa;border-top:1px solid #e5e7eb;">
+              <div style="font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;color:#666;font-weight:600;margin-bottom:8px;">📷 Photos NVR/DVR #${i+1}</div>
+              ${photos.map(p=>`<div style="margin-bottom:8px;"><img src="${p.src}" style="width:100%;max-width:500px;border-radius:5px;border:1px solid #e5e7eb;display:block;"></div>`).join('')}
+            </td></tr>`;
+          })()}
         `).join('')}
       </tbody>
     </table>
+  </div>
+  `:''}
+
+  <!-- PHOTOS DU SITE -->
+  ${((data.photos||{})['site-general']||[]).length?`
+  <div class="sec avoid-break">
+    <div class="sec-title">Photos du site</div>
+    ${((data.photos||{})['site-general']||[]).map(p=>`
+      <div style="margin-bottom:10px;">
+        <img src="${p.src}" style="width:100%;max-width:600px;border-radius:6px;border:1px solid #e5e7eb;display:block;">
+      </div>`).join('')}
   </div>
   `:''}
 
@@ -2308,39 +2792,45 @@ body{font-family:'Inter',sans-serif;font-size:10.5pt;color:var(--text);backgroun
     <div class="sec-title">Anomalies à traiter — ${camAnomalie.length} caméra${camAnomalie.length>1?'s':''} concernée${camAnomalie.length>1?'s':''}</div>
     <table class="prio-table">
       <thead>
-        <tr><th>#</th><th>Caméra</th><th>Emplacement</th><th>État</th><th>Criticité</th><th>Anomalie constatée</th><th>Action réalisée</th></tr>
+        <tr><th>#</th><th>Caméra</th><th>Emplacement</th><th>NVR / DVR</th><th>État</th><th>Criticité</th><th>Anomalie constatée</th><th>Action réalisée</th></tr>
       </thead>
       <tbody>
-        ${camAnomalie.map((cam,i)=>`
+        ${camAnomalie.map((cam,i)=>{
+          const nvr = data.nvrs.find(n=>String(n.id)===String(cam.nvrId));
+          const nvrLabel = nvr ? ([nvr.marque,nvr.modele].filter(Boolean).join(' ')||'NVR #'+(data.nvrs.indexOf(nvr)+1)) : '—';
+          return `
           <tr class="${cam.etat==='ko'?'prio-ko':'prio-warn'}">
             <td class="mono" style="color:var(--text3);">${String(i+1).padStart(2,'0')}</td>
             <td><strong>${cam.nom||'CAM-'+String(data.cameras.indexOf(cam)+1).padStart(2,'0')}</strong><br><span style="font-size:8.5px;color:var(--text3);">${cam.type||''} ${cam.marque||''}</span></td>
             <td style="font-size:9.5px;">${cam.emplacement||'—'}</td>
+            <td style="font-size:9px;font-family:monospace;">${nvrLabel}</td>
             <td>${cam.etat==='ko'?`<span class="crit-badge crit-critique">✗ KO</span>`:`<span class="crit-badge crit-moyen">! DÉGRADÉ</span>`}</td>
             <td>${cam.criticite?`<span class="crit-badge ${cam.criticite==='critique'?'crit-critique':cam.criticite==='moyen'?'crit-moyen':'crit-faible'}">${cam.criticite}</span>`:`<span class="crit-badge crit-na">—</span>`}</td>
             <td style="font-size:9.5px;">${cam.anomalies||'—'}</td>
             <td style="font-size:9.5px;">${cam.actions||'—'}</td>
-          </tr>
-        `).join('')}
+          </tr>`;
+        }).join('')}
       </tbody>
     </table>
   </div>
   `:''}
 
   <!-- DETAIL CAMERAS -->
-  <div class="sec page-break">
+  <div class="sec avoid-break">
     <div class="sec-title">État détaillé de chaque caméra</div>
     <div class="cam-grid">
       ${data.cameras.map((cam,i)=>{
         const cls = cam.etat==='ok'?'cam-ok':cam.etat==='ko'?'cam-ko':cam.etat==='warn'?'cam-warn':'cam-na';
         const checks = Object.entries(cam.checks||{});
+        const nvr = data.nvrs.find(n=>String(n.id)===String(cam.nvrId));
+        const nvrLabel = nvr ? ([nvr.marque,nvr.modele].filter(Boolean).join(' ')||('NVR #'+(data.nvrs.indexOf(nvr)+1))) : null;
         return `
         <div class="cam-card ${cls} avoid-break">
           <div class="cam-head">
             <div class="cam-num">${String(i+1).padStart(2,'0')}</div>
             <div>
               <div class="cam-name">${cam.nom||'CAM-'+String(i+1).padStart(2,'0')}</div>
-              <div class="cam-loc">${cam.emplacement||'Emplacement non renseigné'}</div>
+              <div class="cam-loc">${cam.emplacement||'Emplacement non renseigné'}${nvrLabel?` <span style="color:#888;font-size:8px;margin-left:6px;">🖥 ${nvrLabel}</span>`:''}</div>
             </div>
             <div class="cam-type-badge">${[cam.type,cam.marque].filter(Boolean).join(' · ')||'—'}</div>
             <div>${cam.etat?`${cam.etat==='ok'?`<span style="background:#eaf6ef;color:#166534;border:1px solid #86efac;border-radius:20px;padding:3px 10px;font-size:9px;font-weight:700;">✓ OK</span>`:cam.etat==='ko'?`<span style="background:#fdecea;color:#991b1b;border:1px solid #fca5a5;border-radius:20px;padding:3px 10px;font-size:9px;font-weight:700;">✗ KO</span>`:`<span style="background:#fff8e1;color:#92400e;border:1px solid #fcd34d;border-radius:20px;padding:3px 10px;font-size:9px;font-weight:700;">! DÉGRADÉ</span>`}`:'<span style="background:#f3f4f6;color:#9ca3af;border-radius:20px;padding:3px 10px;font-size:9px;">—</span>'}</div>
@@ -2358,6 +2848,17 @@ body{font-family:'Inter',sans-serif;font-size:10.5pt;color:var(--text);backgroun
             <div></div>
             ${cam.anomalies?`<div class="anomaly-box"><div class="anom-label">Anomalie constatée</div><div class="anom-text">${cam.anomalies}</div></div>`:''}
             ${cam.actions?`<div class="action-box"><div class="act-label">Action réalisée sur place</div><div class="act-text">${cam.actions}</div></div>`:''}
+            ${(()=>{
+              const photosAvant = (data.photos||{})['cam-'+cam.id+'-avant']||[];
+              const photosApres = (data.photos||{})['cam-'+cam.id+'-apres']||[];
+              if(!photosAvant.length && !photosApres.length) return '';
+              const renderPhotos = (list, titre) => list.length ? `
+                <div style="margin-top:8px;">
+                  <div style="font-size:8px;text-transform:uppercase;letter-spacing:.8px;color:#666;font-weight:600;margin-bottom:5px;">${titre}</div>
+                  ${list.map(p=>`<div style="margin-bottom:6px;"><img src="${p.src}" style="width:100%;max-width:400px;border-radius:5px;border:1px solid #e5e7eb;display:block;"></div>`).join('')}
+                </div>` : '';
+              return renderPhotos(photosAvant,'📷 Avant intervention') + renderPhotos(photosApres,'📷 Après intervention');
+            })()}
           </div>
         </div>`;
       }).join('')}
@@ -3000,6 +3501,791 @@ function toggleModopStep(key) {
   const el = document.getElementById('mstep-' + key);
   if (el) el.classList.toggle('open', !!modopOpenSteps[key]);
 }
+
+// ==================== HISTORIQUE ====================
+const HIST_KEY = 'essor_historique_v1';
+
+function loadHistorique() {
+  try {
+    return JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+  } catch(e) { return []; }
+}
+
+function saveHistorique(list) {
+  localStorage.setItem(HIST_KEY, JSON.stringify(list));
+}
+
+function sauvegarderIntervention() {
+  const data = collectData();
+  const total = data.cameras.length;
+  const ok = data.cameras.filter(c => c.etat === 'ok').length;
+  const ko = data.cameras.filter(c => c.etat === 'ko').length;
+  const warn = data.cameras.filter(c => c.etat === 'warn').length;
+  const pct = total ? Math.round((ok / total) * 100) : 0;
+
+  if (!data.site.bailleur && !data.site.adresse) {
+    showToast('Renseigner au moins le bailleur ou l\'adresse avant de sauvegarder.');
+    return;
+  }
+
+  const list = loadHistorique();
+  const id = state.currentInterventionId || Date.now().toString();
+  state.currentInterventionId = id;
+
+  const record = {
+    id,
+    savedAt: new Date().toISOString(),
+    stats: { total, ok, ko, warn, pct },
+    data
+  };
+
+  const idx = list.findIndex(r => r.id === id);
+  if (idx >= 0) {
+    list[idx] = record;
+    showToast('Intervention mise à jour dans l\'historique ✓');
+  } else {
+    list.unshift(record);
+    showToast('Intervention sauvegardée dans l\'historique ✓');
+  }
+
+  saveHistorique(list);
+}
+
+function supprimerIntervention(id, e) {
+  e.stopPropagation();
+  if (!confirm('Supprimer cette intervention de l\'historique ?')) return;
+  const list = loadHistorique().filter(r => r.id !== id);
+  saveHistorique(list);
+  renderHistorique();
+  showToast('Intervention supprimée');
+}
+
+function ouvrirIntervention(id, e) {
+  e.stopPropagation();
+  const list = loadHistorique();
+  const record = list.find(r => r.id === id);
+  if (!record) return;
+
+  if (!confirm('Ouvrir cette intervention ? La saisie en cours sera remplacée.')) return;
+
+  const d = record.data;
+  // Fill site fields
+  const fields = {
+    baillerNom: d.site.bailleur, siteAdresse: d.site.adresse,
+    siteRef: d.site.ref, siteType: d.site.type,
+    techNom: d.site.technicien, dateIntervention: d.site.date,
+    heureDebut: d.site.heureDebut, heureFin: d.site.heureFin,
+    ordreNum: d.site.ordre, contactSite: d.site.contact,
+    obsPrealables: d.site.obsPrealables,
+    conclusion: d.conclusion, actionsRetour: d.actionsRetour,
+    visaTech: d.visaTech, visaClient: d.visaClient
+  };
+  Object.entries(fields).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el && val) el.value = val;
+  });
+
+  // Restore NVRs, cameras and photos
+  state.nvrs = d.nvrs || [];
+  state.cameras = d.cameras || [];
+  state.photos = record.data.photos || {};
+  state.currentInterventionId = record.id;
+
+  renderNVRs();
+  renderCameras();
+  updateStats();
+  setTimeout(() => {
+    renderPhotoZone('photos-site-general', 'site-general', 'Site');
+  }, 50);
+
+  toggleHistorique();
+  goToPage(1);
+  showToast('Intervention chargée ✓');
+}
+
+function nouvelleIntervention() {
+  const bailleur = document.getElementById('baillerNom')?.value;
+  const hasData = bailleur || state.cameras.length > 1 || state.nvrs.length > 1;
+
+  if (hasData && !confirm('Démarrer une nouvelle intervention ?\n\nPense à sauvegarder dans l\'historique si tu veux conserver la saisie en cours.')) return;
+
+  // Reset all fields
+  ['baillerNom','siteAdresse','siteRef','siteType','techNom','dateIntervention',
+   'heureDebut','heureFin','ordreNum','contactSite','obsPrealables',
+   'conclusion','actionsRetour','visaTech','visaClient'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  document.getElementById('dateIntervention').value = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  document.getElementById('heureDebut').value = now.toTimeString().slice(0, 5);
+  document.getElementById('heureFin').value = '';
+
+  state.nvrs = [];
+  state.cameras = [];
+  state.photos = {};
+  state.currentInterventionId = null;
+
+  addNVR();
+  addCameras(1);
+  renderNVRs();
+  renderCameras();
+  updateStats();
+
+  // Close any open overlay
+  document.getElementById('historiqueOverlay')?.classList.remove('open');
+  document.getElementById('carteOverlay')?.classList.remove('open');
+
+  goToPage(1);
+  showToast('Nouveau formulaire prêt ✓');
+}
+
+function toggleHistorique() {
+  const overlay = document.getElementById('historiqueOverlay');
+  overlay.classList.toggle('open');
+  if (overlay.classList.contains('open')) {
+    renderHistorique();
+  }
+}
+
+function renderHistorique() {
+  const list = loadHistorique();
+  const search = (document.getElementById('histSearch')?.value || '').toLowerCase();
+  const sort = document.getElementById('histSort')?.value || 'date_desc';
+
+  // Filter
+  let filtered = list.filter(r => {
+    if (!search) return true;
+    const s = r.data.site;
+    return (s.bailleur||'').toLowerCase().includes(search)
+        || (s.adresse||'').toLowerCase().includes(search)
+        || (s.technicien||'').toLowerCase().includes(search)
+        || (s.ref||'').toLowerCase().includes(search);
+  });
+
+  // Sort
+  filtered.sort((a, b) => {
+    if (sort === 'date_desc') return new Date(b.savedAt) - new Date(a.savedAt);
+    if (sort === 'date_asc')  return new Date(a.savedAt) - new Date(b.savedAt);
+    if (sort === 'score_desc') return b.stats.pct - a.stats.pct;
+    if (sort === 'score_asc')  return a.stats.pct - b.stats.pct;
+    if (sort === 'bailleur') return (a.data.site.bailleur||'').localeCompare(b.data.site.bailleur||'');
+    return 0;
+  });
+
+  // Global stats
+  renderHistStats(list);
+
+  // List
+  const container = document.getElementById('histList');
+  if (!filtered.length) {
+    container.innerHTML = `<div class="hist-empty">
+      <div class="hist-empty-icon">🗂</div>
+      <div>${list.length === 0 ? 'Aucune intervention sauvegardée pour l\'instant.<br><br>Effectuez un diagnostic puis cliquez sur <strong>"Sauvegarder dans l\'historique"</strong>.' : 'Aucun résultat pour cette recherche.'}</div>
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(record => {
+    const s = record.data.site;
+    const st = record.stats;
+    const scoreClass = st.pct >= 90 ? 'hist-score-good' : st.pct >= 70 ? 'hist-score-med' : 'hist-score-bad';
+    const dateStr = record.savedAt ? new Date(record.savedAt).toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+    const cameras = record.data.cameras || [];
+    const isActive = state.currentInterventionId === record.id;
+
+    return `<div class="hist-card ${isActive ? 'expanded' : ''}" id="hcard-${record.id}" style="${isActive ? 'border-color:var(--accent)' : ''}">
+      <div class="hist-card-head" onclick="toggleHistCard('${record.id}')">
+        <div class="hist-card-date">${dateStr}</div>
+        <div class="hist-card-info">
+          <div class="hist-card-title">${s.bailleur || 'Bailleur non renseigné'} ${isActive ? '<span style="font-size:10px;color:var(--accent);margin-left:6px;font-family:var(--mono);">● EN COURS</span>' : ''}</div>
+          <div class="hist-card-sub">📍 ${s.adresse || '—'} &nbsp;·&nbsp; 👷 ${s.technicien || '—'} &nbsp;·&nbsp; 🕐 ${s.heureDebut||'—'} → ${s.heureFin||'—'}</div>
+        </div>
+        <div class="hist-score ${scoreClass}">${st.pct}%</div>
+        <div class="hist-actions" onclick="event.stopPropagation()">
+          <button class="hist-btn hist-btn-open" onclick="ouvrirIntervention('${record.id}', event)">📂 Ouvrir</button>
+          <button class="hist-btn hist-btn-del" onclick="supprimerIntervention('${record.id}', event)">✕</button>
+        </div>
+      </div>
+      <div class="hist-card-body">
+        <div class="hist-detail-grid">
+          <div class="hist-detail-item"><label>Référence site</label><span>${s.ref || '—'}</span></div>
+          <div class="hist-detail-item"><label>Type de site</label><span>${s.type || '—'}</span></div>
+          <div class="hist-detail-item"><label>Ordre de mission</label><span>${s.ordre || '—'}</span></div>
+          <div class="hist-detail-item"><label>Total caméras</label><span>${st.total}</span></div>
+          <div class="hist-detail-item"><label>✓ Opérationnelles</label><span style="color:var(--green)">${st.ok}</span></div>
+          <div class="hist-detail-item"><label>✗ KO / ⚠ Dégradées</label><span style="color:var(--red)">${st.ko} / <span style="color:var(--orange)">${st.warn}</span></span></div>
+        </div>
+        ${cameras.length ? `<div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;">Caméras</div>
+        <div class="hist-cam-pills">
+          ${cameras.map(c => {
+            const cls = c.etat === 'ok' ? 'pill-ok' : c.etat === 'ko' ? 'pill-ko' : c.etat === 'warn' ? 'pill-warn' : 'pill-ok';
+            return `<span class="hist-cam-pill ${cls}">${c.nom || c.emplacement || '?'}</span>`;
+          }).join('')}
+        </div>` : ''}
+        ${record.data.conclusion ? `<div style="margin-top:10px;font-size:12px;color:var(--text2);border-top:1px solid var(--border);padding-top:8px;">${record.data.conclusion}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleHistCard(id) {
+  const card = document.getElementById('hcard-' + id);
+  if (card) card.classList.toggle('expanded');
+}
+
+function renderHistStats(list) {
+  const container = document.getElementById('histStats');
+  if (!container) return;
+
+  const total = list.length;
+  const totalCams = list.reduce((s, r) => s + (r.stats.total || 0), 0);
+  const avgScore = total ? Math.round(list.reduce((s, r) => s + r.stats.pct, 0) / total) : 0;
+  const totalKo = list.reduce((s, r) => s + (r.stats.ko || 0) + (r.stats.warn || 0), 0);
+
+  container.innerHTML = `
+    <div class="hist-stat hist-stat-accent">
+      <div class="hist-stat-val">${total}</div>
+      <div class="hist-stat-lbl">Interventions</div>
+    </div>
+    <div class="hist-stat hist-stat-accent">
+      <div class="hist-stat-val">${totalCams}</div>
+      <div class="hist-stat-lbl">Caméras auditées</div>
+    </div>
+    <div class="hist-stat ${avgScore >= 90 ? 'hist-stat-green' : avgScore >= 70 ? 'hist-stat-orange' : 'hist-stat-red'}">
+      <div class="hist-stat-val">${avgScore}%</div>
+      <div class="hist-stat-lbl">Score moyen</div>
+    </div>
+    <div class="hist-stat hist-stat-red">
+      <div class="hist-stat-val">${totalKo}</div>
+      <div class="hist-stat-lbl">Anomalies totales</div>
+    </div>`;
+}
+
+// ==================== CARTE ====================
+let carteMap = null;
+let carteMarkers = [];
+let carteSites = [];
+let carteFiltreActif = 'all';
+let carteActiveSiteId = null;
+
+function toggleCarte() {
+  const overlay = document.getElementById('carteOverlay');
+  overlay.classList.toggle('open');
+  if (overlay.classList.contains('open')) {
+    setTimeout(() => {
+      initCarteMap();
+      chargerSitesDepuisHistorique();
+    }, 100);
+  }
+}
+
+function initCarteMap() {
+  if (carteMap) return;
+
+  // Load Leaflet dynamically
+  if (!window.L) {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+    script.onload = () => {
+      creerCarte();
+      chargerSitesDepuisHistorique();
+    };
+    document.head.appendChild(script);
+  } else {
+    creerCarte();
+  }
+}
+
+function creerCarte() {
+  if (carteMap || !window.L) return;
+
+  carteMap = L.map('carteMap', {
+    center: [46.8, 2.3], zoom: 6,
+    zoomControl: true,
+    attributionControl: true
+  });
+
+  // Essai de plusieurs fournisseurs de tuiles avec fallback automatique
+  const tileProviders = [
+    {
+      url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+      options: { subdomains: ['a','b','c','d'], maxZoom: 20, attribution: '&copy; CARTO &copy; OSM' },
+      dark: true
+    },
+    {
+      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      options: { maxZoom: 19, attribution: '&copy; OpenStreetMap' },
+      dark: false
+    }
+  ];
+
+  let tileLayer = null;
+  let providerIdx = 0;
+
+  // Injecte le style de filtre une seule fois
+  const styleId = 'leaflet-dark-filter';
+  if (!document.getElementById(styleId)) {
+    const s = document.createElement('style');
+    s.id = styleId;
+    s.textContent = '.leaflet-tile-pane.dark-filter { filter: invert(1) hue-rotate(180deg) brightness(0.85) saturate(0.6); }';
+    document.head.appendChild(s);
+  }
+
+  function setDarkMode(isDark) {
+    const pane = carteMap.getPane('tilePane');
+    if (pane) {
+      if (isDark) pane.classList.remove('dark-filter');
+      else pane.classList.add('dark-filter');
+    }
+  }
+
+  function tryNextProvider() {
+    if (tileLayer) carteMap.removeLayer(tileLayer);
+    if (providerIdx >= tileProviders.length) return;
+    const p = tileProviders[providerIdx++];
+    tileLayer = L.tileLayer(p.url, p.options).addTo(carteMap);
+    setDarkMode(p.dark);
+    tileLayer.on('tileerror', () => {
+      if (!tileLayer._errorCount) tileLayer._errorCount = 0;
+      tileLayer._errorCount++;
+      if (tileLayer._errorCount >= 3) tryNextProvider();
+    });
+  }
+
+  tryNextProvider();
+}
+
+async function geocodeAdresse(adresse) {
+  if (!adresse) return null;
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(adresse + ', France')}&format=json&limit=1`;
+    const resp = await fetch(url, { headers: { 'Accept-Language': 'fr' } });
+    const data = await resp.json();
+    if (data && data[0]) {
+      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), display: data[0].display_name };
+    }
+  } catch(e) {}
+  return null;
+}
+
+function creerIconeMarqueur(pct, count) {
+  const color = pct >= 90 ? '#00e676' : pct >= 70 ? '#ffaa00' : '#ff3d57';
+  const badge = count > 1 ? `<div style="position:absolute;top:-4px;right:-4px;background:${color};color:#0d0f14;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:monospace;border:1px solid #0d0f14;">${count}</div>` : '';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44">
+    <defs>
+      <filter id="glow${pct}">
+        <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+        <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <path d="M18 2C10.268 2 4 8.268 4 16c0 10.5 14 26 14 26S32 26.5 32 16C32 8.268 25.732 2 18 2z" fill="#161921" stroke="${color}" stroke-width="2" filter="url(#glow${pct})"/>
+    <circle cx="18" cy="16" r="8" fill="${color}" opacity="0.15"/>
+    <circle cx="18" cy="16" r="5" fill="${color}"/>
+    <circle cx="18" cy="16" r="2" fill="#0d0f14"/>
+  </svg>`;
+  return window.L ? L.divIcon({
+    html: `<div style="position:relative;">${svg}${badge}</div>`,
+    iconSize: [36, 44],
+    iconAnchor: [18, 44],
+    popupAnchor: [0, -48],
+    className: ''
+  }) : null;
+}
+
+function scoreClass(pct) {
+  return pct >= 90 ? 'hist-score-good' : pct >= 70 ? 'hist-score-med' : 'hist-score-bad';
+}
+
+function scoreColor(pct) {
+  return pct >= 90 ? 'var(--green)' : pct >= 70 ? 'var(--orange)' : 'var(--red)';
+}
+
+async function chargerSitesDepuisHistorique() {
+  if (!carteMap) { setTimeout(chargerSitesDepuisHistorique, 300); return; }
+
+  const list = loadHistorique();
+  if (!list.length) { renderSidebarSites([]); return; }
+
+  // Grouper TOUTES les interventions par adresse
+  const groupesMap = {};
+  list.forEach(record => {
+    const adresse = (record.data.site.adresse || '').toLowerCase().trim();
+    const key = adresse || ('_noadr_' + record.id);
+    if (!groupesMap[key]) groupesMap[key] = { adresse: record.data.site.adresse || '', interventions: [], coords: null };
+    groupesMap[key].interventions.push(record);
+  });
+
+  // Trier chaque groupe par date desc
+  Object.values(groupesMap).forEach(g => {
+    g.interventions.sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
+  });
+
+  // Construire la liste de sites (un par adresse unique)
+  carteSites = Object.values(groupesMap).map(g => {
+    const derniere = g.interventions[0];
+    // Score moyen du groupe
+    const pctMoyen = Math.round(g.interventions.reduce((s, r) => s + (r.stats?.pct ?? 0), 0) / g.interventions.length);
+    return {
+      id: derniere.id, // id de la plus récente pour sidebar
+      adresseKey: g.adresse.toLowerCase().trim(),
+      bailleur: derniere.data.site.bailleur || 'Site sans nom',
+      adresse: g.adresse,
+      interventions: g.interventions,
+      stats: { ...derniere.stats, pct: pctMoyen },
+      coords: null
+    };
+  });
+
+  // Clear markers
+  carteMarkers.forEach(m => m.remove());
+  carteMarkers = [];
+
+  // Géocoder chaque adresse unique
+  const geoBar = document.getElementById('geoBar');
+  const geoText = document.getElementById('geoBarText');
+  if (geoBar) geoBar.classList.add('visible');
+
+  let geocoded = 0;
+  for (let site of carteSites) {
+    if (!site.adresse) { geocoded++; continue; }
+    if (geoText) geoText.textContent = `Géocodage ${geocoded + 1}/${carteSites.length} — ${site.adresse}`;
+
+    const cacheKey = 'geo_' + site.adresse.toLowerCase().trim();
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      site.coords = JSON.parse(cached);
+    } else {
+      site.coords = await geocodeAdresse(site.adresse);
+      if (site.coords) sessionStorage.setItem(cacheKey, JSON.stringify(site.coords));
+      await new Promise(r => setTimeout(r, 300));
+    }
+    geocoded++;
+    if (site.coords) ajouterMarqueur(site);
+  }
+
+  if (geoBar) geoBar.classList.remove('visible');
+
+  renderSidebarSites(carteSites);
+  renderCarteStats(carteSites);
+  appliquerFiltreCarteMarqueurs();
+
+  const withCoords = carteSites.filter(s => s.coords);
+  if (withCoords.length > 0 && window.L) {
+    const bounds = L.latLngBounds(withCoords.map(s => [s.coords.lat, s.coords.lng]));
+    carteMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
+  }
+}
+
+function ajouterMarqueur(site) {
+  if (!site.coords || !window.L || !carteMap) return;
+  const pct = site.stats?.pct ?? 0;
+  const count = site.interventions?.length ?? 1;
+  const icon = creerIconeMarqueur(pct, count);
+
+  const marker = L.marker([site.coords.lat, site.coords.lng], { icon })
+    .addTo(carteMap);
+
+  marker.bindPopup(creerContenuPopup(site), { maxWidth: 320, minWidth: 280 });
+
+  marker.on('click', () => {
+    carteActiveSiteId = site.id;
+    highlightSidebarItem(site.id);
+  });
+
+  marker._siteId = site.id;
+  marker._pct = pct;
+  carteMarkers.push(marker);
+}
+
+function creerContenuPopup(site) {
+  const interventions = site.interventions || [];
+  const pct = site.stats?.pct ?? 0;
+  const color = scoreColor(pct);
+  const nbInterv = interventions.length;
+
+  // En-tête commun
+  let html = `<div class="map-popup">
+    <div class="map-popup-header">
+      <div class="map-popup-title">${site.bailleur}</div>
+      <div class="map-popup-score ${scoreClass(pct)}" style="color:${color}">${pct}%</div>
+    </div>
+    <div class="map-popup-row">📍 <span>${site.adresse || '—'}</span></div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin:8px 0 6px;">${nbInterv} intervention${nbInterv > 1 ? 's' : ''} sur ce site</div>`;
+
+  // Une carte par intervention
+  interventions.forEach((record, idx) => {
+    const s = record.stats;
+    const d = record.data.site;
+    const dateFr = d.date ? new Date(d.date).toLocaleDateString('fr-FR') : '—';
+    const pctI = s?.pct ?? 0;
+    const colorI = scoreColor(pctI);
+    const borderColor = pctI >= 90 ? 'rgba(0,230,118,0.3)' : pctI >= 70 ? 'rgba(255,170,0,0.3)' : 'rgba(255,61,87,0.3)';
+
+    html += `<div style="background:var(--surface2);border:1px solid ${borderColor};border-radius:7px;padding:9px 11px;margin-bottom:7px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+        <div style="font-size:11px;font-weight:600;color:var(--text);">📅 ${dateFr} &nbsp;·&nbsp; 👷 ${d.technicien || '—'}</div>
+        <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:${colorI}">${pctI}%</div>
+      </div>
+      <div style="display:flex;gap:5px;margin-bottom:7px;">
+        <div style="flex:1;text-align:center;background:var(--surface);border-radius:5px;padding:4px 2px;border:1px solid var(--border);">
+          <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text);">${s?.total ?? 0}</div>
+          <div style="font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;">Total</div>
+        </div>
+        <div style="flex:1;text-align:center;background:var(--surface);border-radius:5px;padding:4px 2px;border:1px solid var(--border);">
+          <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green);">${s?.ok ?? 0}</div>
+          <div style="font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;">OK</div>
+        </div>
+        <div style="flex:1;text-align:center;background:var(--surface);border-radius:5px;padding:4px 2px;border:1px solid var(--border);">
+          <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--orange);">${s?.warn ?? 0}</div>
+          <div style="font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;">Dégradé</div>
+        </div>
+        <div style="flex:1;text-align:center;background:var(--surface);border-radius:5px;padding:4px 2px;border:1px solid var(--border);">
+          <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--red);">${s?.ko ?? 0}</div>
+          <div style="font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;">KO</div>
+        </div>
+      </div>
+      <button class="map-popup-btn" onclick="ouvrirDepuisCarte('${record.id}')" style="background:var(--surface);color:var(--accent);border:1px solid rgba(0,212,255,0.3);font-size:11px;padding:6px;">
+        📂 Ouvrir ce diagnostic
+      </button>
+    </div>`;
+  });
+
+  html += `</div>`;
+  return html;
+}
+
+function ouvrirDepuisCarte(id) {
+  const list = loadHistorique();
+  const record = list.find(r => r.id === id);
+  if (!record) return;
+  const d = record.data;
+  const fields = {
+    baillerNom: d.site.bailleur, siteAdresse: d.site.adresse,
+    siteRef: d.site.ref, siteType: d.site.type,
+    techNom: d.site.technicien, dateIntervention: d.site.date,
+    heureDebut: d.site.heureDebut, heureFin: d.site.heureFin,
+    ordreNum: d.site.ordre, contactSite: d.site.contact,
+    obsPrealables: d.site.obsPrealables,
+    conclusion: d.conclusion, actionsRetour: d.actionsRetour,
+    visaTech: d.visaTech, visaClient: d.visaClient
+  };
+  Object.entries(fields).forEach(([fid, val]) => {
+    const el = document.getElementById(fid);
+    if (el && val) el.value = val;
+  });
+  state.nvrs = d.nvrs || [];
+  state.cameras = d.cameras || [];
+  state.currentInterventionId = record.id;
+  renderNVRs(); renderCameras(); updateStats();
+  toggleCarte();
+  goToPage(1);
+  showToast('Diagnostic chargé depuis la carte ✓');
+}
+
+function setFiltreCarteScoped(filtre) {
+  carteFiltreActif = filtre;
+  ['all','ok','warn','ko'].forEach(f => {
+    const btn = document.getElementById('filt-' + f);
+    if (btn) { btn.className = 'carte-filter-btn'; if (f === filtre) btn.classList.add('active-' + f); }
+  });
+  appliquerFiltreCarteMarqueurs();
+  filterSidebarScoped();
+}
+
+function appliquerFiltreCarteMarqueurs() {
+  carteMarkers.forEach(marker => {
+    const site = carteSites.find(s => s.id === marker._siteId);
+    if (!site) return;
+    const pct = site.stats?.pct ?? 0;
+    const visible = carteFiltreActif === 'all'
+      || (carteFiltreActif === 'ok'   && pct >= 90)
+      || (carteFiltreActif === 'warn' && pct >= 70 && pct < 90)
+      || (carteFiltreActif === 'ko'   && pct < 70);
+    if (visible) { if (!carteMap.hasLayer(marker)) marker.addTo(carteMap); }
+    else { carteMap.removeLayer(marker); }
+  });
+}
+
+function renderSidebarSites(sites) {
+  const search = (document.getElementById('carteSidebarSearch')?.value || '').toLowerCase();
+  const siteCountEl = document.getElementById('siteCount');
+  const list = document.getElementById('carteSiteList');
+  if (!list) return;
+
+  let filtered = sites.filter(s => {
+    if (carteFiltreActif !== 'all') {
+      const pct = s.stats?.pct ?? 0;
+      if (carteFiltreActif === 'ok'   && pct < 90)  return false;
+      if (carteFiltreActif === 'warn' && (pct < 70 || pct >= 90)) return false;
+      if (carteFiltreActif === 'ko'   && pct >= 70)  return false;
+    }
+    if (!search) return true;
+    return (s.bailleur||'').toLowerCase().includes(search)
+        || (s.adresse||'').toLowerCase().includes(search);
+  });
+
+  if (siteCountEl) siteCountEl.textContent = filtered.length;
+
+  if (!filtered.length) {
+    list.innerHTML = `<div style="padding:24px;text-align:center;color:var(--text2);font-size:12px;">Aucun site trouvé</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(site => {
+    const pct = site.stats?.pct ?? 0;
+    const nbInterv = site.interventions?.length ?? 1;
+    const dotCls = pct >= 90 ? 'site-dot-ok' : pct >= 70 ? 'site-dot-warn' : site.coords ? 'site-dot-ko' : 'site-dot-geo';
+    const color = scoreColor(pct);
+    const isActive = site.id === carteActiveSiteId;
+    return `<div class="carte-site-item ${isActive ? 'active' : ''}" id="sidebar-${site.id}" onclick="volerVersSite('${site.id}')">
+      <div class="site-dot ${dotCls}"></div>
+      <div style="flex:1;min-width:0;">
+        <div class="carte-site-name">${site.bailleur}${nbInterv > 1 ? ` <span style="font-size:9px;font-family:var(--mono);color:var(--accent);background:rgba(0,212,255,0.1);border-radius:3px;padding:1px 5px;">${nbInterv}</span>` : ''}</div>
+        <div class="carte-site-addr">${site.adresse || 'Adresse non renseignée'}</div>
+      </div>
+      <div class="carte-site-score" style="color:${color}">${site.stats?.total ? pct + '%' : '—'}</div>
+    </div>`;
+  }).join('');
+}
+
+function filterSidebarScoped() {
+  renderSidebarSites(carteSites);
+}
+
+function volerVersSite(id) {
+  const site = carteSites.find(s => s.id === id);
+  if (!site) return;
+  carteActiveSiteId = id;
+  highlightSidebarItem(id);
+
+  if (site.coords && carteMap) {
+    carteMap.flyTo([site.coords.lat, site.coords.lng], 15, { duration: 1.2 });
+    const marker = carteMarkers.find(m => m._siteId === id);
+    if (marker) setTimeout(() => marker.openPopup(), 1300);
+  }
+}
+
+function highlightSidebarItem(id) {
+  document.querySelectorAll('.carte-site-item').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('sidebar-' + id);
+  if (el) { el.classList.add('active'); el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+}
+
+function renderCarteStats(sites) {
+  const bar = document.getElementById('carteStatsBar');
+  if (!bar) return;
+  const total = sites.length;
+  const geocoded = sites.filter(s => s.coords).length;
+  const avgPct = total ? Math.round(sites.reduce((s, r) => s + (r.stats?.pct ?? 0), 0) / total) : 0;
+  bar.innerHTML = `
+    <div class="carte-mini-stat"><strong>${total}</strong> sites</div>
+    <div class="carte-mini-stat"><strong>${geocoded}</strong> géolocalisés</div>
+    <div class="carte-mini-stat">Moy. <strong style="color:${scoreColor(avgPct)}">${avgPct}%</strong></div>`;
+}
+
+// ==================== PHOTOS ====================
+// state.photos = { 'site-general': [{id,src,label}], 'nvr-{id}-{slot}': [...], 'cam-{id}-avant': [...], 'cam-{id}-apres': [...] }
+if (!state.photos) state.photos = {};
+
+function renderPhotoZone(containerId, photoKey, label) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const photos = state.photos[photoKey] || [];
+
+  container.innerHTML = photos.map((p, i) => `
+    <div class="photo-thumb" onclick="openLightbox('${photoKey}',${i})">
+      <img src="${p.src}" alt="${p.label||label}">
+      ${p.label ? `<div class="photo-thumb-label">${p.label}</div>` : ''}
+      <button class="photo-thumb-del" onclick="deletePhoto(event,'${photoKey}',${i})">✕</button>
+    </div>
+  `).join('') + `
+    <button class="photo-add-btn" onclick="addPhoto('${photoKey}','${label}',this)">
+      <span class="photo-add-icon">＋</span>
+      <span>Photo</span>
+    </button>`;
+}
+
+function addPhoto(photoKey, label, btn) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.multiple = true;
+  input.onchange = (e) => {
+    const files = Array.from(e.target.files);
+    let loaded = 0;
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        if (!state.photos[photoKey]) state.photos[photoKey] = [];
+        state.photos[photoKey].push({ id: Date.now() + Math.random(), src: ev.target.result, label });
+        loaded++;
+        if (loaded === files.length) {
+          // Re-render the right container
+          const containerId = btn.closest('.photo-grid')?.id || btn.parentElement?.id;
+          if (containerId) renderPhotoZone(containerId, photoKey, label);
+          else refreshAllPhotoZones();
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+  input.click();
+}
+
+function deletePhoto(e, photoKey, idx) {
+  e.stopPropagation();
+  if (!confirm('Supprimer cette photo ?')) return;
+  if (state.photos[photoKey]) {
+    state.photos[photoKey].splice(idx, 1);
+    refreshAllPhotoZones();
+    // Re-render modal photos if open
+    if (state.modalCamIndex !== null) refreshModalPhotos();
+  }
+}
+
+function refreshAllPhotoZones() {
+  // Site
+  renderPhotoZone('photos-site-general', 'site-general', 'Site');
+  // NVR zones
+  state.nvrs.forEach(nvr => {
+    const cid = 'photos-nvr-' + nvr.id;
+    if (document.getElementById(cid)) renderPhotoZone(cid, 'nvr-' + nvr.id, 'NVR');
+  });
+}
+
+function refreshModalPhotos() {
+  const cam = state.cameras.find(c => c.id === state.modalCamIndex);
+  if (!cam) return;
+  renderPhotoZone('modal-photos-avant', 'cam-' + cam.id + '-avant', 'Avant');
+  renderPhotoZone('modal-photos-apres', 'cam-' + cam.id + '-apres', 'Après');
+}
+
+function openLightbox(photoKey, idx) {
+  const photo = (state.photos[photoKey] || [])[idx];
+  if (!photo) return;
+  document.getElementById('lbImg').src = photo.src;
+  document.getElementById('lbCaption').textContent = photo.label || '';
+  document.getElementById('photoLightbox').classList.add('open');
+}
+
+function closeLightbox() {
+  document.getElementById('photoLightbox').classList.remove('open');
+  document.getElementById('lbImg').src = '';
+}
+
+document.getElementById('photoLightbox').addEventListener('click', function(e) {
+  if (e.target === this) closeLightbox();
+});
+
+// Init site photo zone on load
+document.addEventListener('DOMContentLoaded', () => {
+  renderPhotoZone('photos-site-general', 'site-general', 'Site');
+});
+
+// Init historique state
+state.currentInterventionId = null;
 </script>
 </body>
 </html>
