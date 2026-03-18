@@ -1,0 +1,3005 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnostic ESSOR — Vidéosurveillance</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161921;
+    --surface2: #1e2230;
+    --border: #2a2f3d;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --green: #00e676;
+    --red: #ff3d57;
+    --orange: #ffaa00;
+    --text: #e8eaf0;
+    --text2: #8b90a0;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+
+  .logo-text {
+    font-family: var(--mono);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 2px;
+  }
+
+  .logo-sub {
+    font-size: 10px;
+    color: var(--text2);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* STEPS NAV */
+  .steps-nav {
+    display: flex;
+    gap: 4px;
+  }
+
+  .step-dot {
+    width: 28px; height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .step-dot.active { background: var(--accent); }
+  .step-dot.done { background: var(--green); }
+
+  /* MAIN */
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+
+  /* SECTION HEADER */
+  .section-header {
+    margin-bottom: 20px;
+  }
+
+  .section-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .section-desc {
+    color: var(--text2);
+    margin-top: 4px;
+    font-size: 13px;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+
+  /* FORM ELEMENTS */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .form-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .form-grid.cols-1 { grid-template-columns: 1fr; }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 5px;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: var(--accent);
+  }
+
+  .field textarea { resize: vertical; min-height: 70px; }
+
+  .field select option { background: var(--surface2); }
+
+  /* CAMERA TABLE */
+  .cam-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .cam-table th {
+    text-align: left;
+    font-size: 10px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 500;
+  }
+
+  .cam-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    vertical-align: middle;
+  }
+
+  .cam-table tr:last-child td { border-bottom: none; }
+
+  .cam-table input[type="text"],
+  .cam-table select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid transparent;
+    border-radius: 5px;
+    padding: 6px 8px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 12px;
+    outline: none;
+  }
+
+  .cam-table input[type="text"]:focus,
+  .cam-table select:focus {
+    border-color: var(--accent);
+  }
+
+  /* STATUS BADGES */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--mono);
+  }
+
+  .status-ok { background: rgba(0,230,118,0.12); color: var(--green); }
+  .status-ko { background: rgba(255,61,87,0.12); color: var(--red); }
+  .status-warn { background: rgba(255,170,0,0.12); color: var(--orange); }
+  .status-na { background: rgba(139,144,160,0.12); color: var(--text2); }
+
+  /* CHECK GRID */
+  .check-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .check-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    user-select: none;
+  }
+
+  .check-item:hover { border-color: var(--text2); }
+
+  .check-item.checked-ok { border-color: var(--green); background: rgba(0,230,118,0.06); }
+  .check-item.checked-ko { border-color: var(--red); background: rgba(255,61,87,0.06); }
+  .check-item.checked-warn { border-color: var(--orange); background: rgba(255,170,0,0.06); }
+
+  .check-icon {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .check-label {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .check-sub {
+    font-size: 10px;
+    color: var(--text2);
+    margin-top: 1px;
+  }
+
+  /* STATUS SELECTOR */
+  .status-selector {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+  }
+
+  .status-btn {
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: var(--mono);
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    background: transparent;
+    color: var(--text2);
+    border-color: var(--border);
+  }
+
+  .status-btn:hover { border-color: var(--text2); color: var(--text); }
+  .status-btn.btn-ok.active { background: rgba(0,230,118,0.15); color: var(--green); border-color: var(--green); }
+  .status-btn.btn-ko.active { background: rgba(255,61,87,0.15); color: var(--red); border-color: var(--red); }
+  .status-btn.btn-warn.active { background: rgba(255,170,0,0.15); color: var(--orange); border-color: var(--orange); }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 18px;
+    border-radius: 7px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+  }
+  .btn-primary:hover { background: #00bcd4; }
+
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--text2); }
+
+  .btn-danger {
+    background: rgba(255,61,87,0.1);
+    color: var(--red);
+    border: 1px solid rgba(255,61,87,0.3);
+  }
+
+  .btn-success {
+    background: var(--green);
+    color: #000;
+  }
+  .btn-success:hover { background: #00c864; }
+
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  /* ACTIONS ROW */
+  .actions-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    padding-bottom: 30px;
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .stat-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    min-width: 80px;
+  }
+
+  .stat-val {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .stat-lbl {
+    font-size: 10px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: 2px;
+  }
+
+  .stat-ok .stat-val { color: var(--green); }
+  .stat-ko .stat-val { color: var(--red); }
+  .stat-warn .stat-val { color: var(--orange); }
+
+  /* CAMERA ROW EXPANDED */
+  .cam-row-expanded {
+    background: rgba(0,212,255,0.03);
+    border-left: 2px solid var(--accent);
+  }
+
+  .cam-detail-panel {
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+  }
+
+  /* INTERVENTION LIST */
+  .intervention-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .intervention-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .intervention-number {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 4px;
+    padding: 2px 6px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* PROGRESS */
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    max-width: 520px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  /* SUMMARY */
+  .summary-section {
+    margin-bottom: 20px;
+  }
+
+  .summary-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px;
+  }
+
+  .summary-row .key { color: var(--text2); }
+  .summary-row .val { font-weight: 500; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--surface);
+    border: 1px solid var(--green);
+    color: var(--green);
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 300;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .toast.show { opacity: 1; }
+
+  /* NVR INFO */
+  .nvr-info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .nvr-chip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 10px 12px;
+  }
+
+  .nvr-chip label {
+    font-size: 10px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .nvr-chip input, .nvr-chip select {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 4px 0;
+    outline: none;
+    margin-top: 4px;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid.cols-3 { grid-template-columns: 1fr 1fr; }
+    .check-grid { grid-template-columns: 1fr; }
+    .nvr-info-grid { grid-template-columns: 1fr 1fr; }
+    .stats-bar { gap: 8px; }
+    .stat-chip { min-width: 60px; padding: 8px 10px; }
+    .stat-val { font-size: 16px; }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  .inline-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: rgba(0,212,255,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(0,212,255,0.2);
+  }
+
+  .anomaly-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-family: var(--mono);
+    padding: 2px 7px;
+    border-radius: 3px;
+    background: rgba(255,61,87,0.1);
+    color: var(--red);
+    border: 1px solid rgba(255,61,87,0.2);
+  }
+
+  /* ===== MODE OPERATOIRE ===== */
+  #modopOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 150;
+    overflow-y: auto;
+  }
+  #modopOverlay.open { display: block; }
+
+  .modop-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .modop-title {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--orange);
+    letter-spacing: 2px;
+  }
+
+  .modop-close {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--sans);
+  }
+  .modop-close:hover { border-color: var(--accent); color: var(--accent); }
+
+  .modop-body {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  /* Phase tabs */
+  .modop-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modop-tab {
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    font-family: var(--mono);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .modop-tab:hover { border-color: var(--text2); color: var(--text); }
+  .modop-tab.active { background: var(--orange); color: #000; border-color: var(--orange); }
+
+  /* Phase content */
+  .modop-phase { display: none; }
+  .modop-phase.active { display: block; }
+
+  .modop-phase-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    border-left: 3px solid var(--orange);
+  }
+
+  .modop-phase-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--orange);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .modop-phase-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .modop-phase-desc {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+
+  /* Steps */
+  .modop-step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .modop-step-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 16px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .modop-step-head:hover { background: var(--surface2); }
+
+  .modop-step-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 4px;
+    padding: 2px 7px;
+    flex-shrink: 0;
+  }
+
+  .modop-step-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .modop-step-tag {
+    font-size: 10px;
+    font-weight: 700;
+    font-family: var(--mono);
+    padding: 2px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .tag-info { background: rgba(0,212,255,0.12); color: var(--accent); }
+  .tag-warn { background: rgba(255,170,0,0.12); color: var(--orange); }
+  .tag-danger { background: rgba(255,61,87,0.12); color: var(--red); }
+  .tag-ok { background: rgba(0,230,118,0.12); color: var(--green); }
+
+  .modop-step-arrow {
+    font-size: 10px;
+    color: var(--text2);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .modop-step.open .modop-step-arrow { transform: rotate(180deg); }
+
+  .modop-step-body {
+    display: none;
+    padding: 16px;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .modop-step.open .modop-step-body { display: block; }
+
+  /* Content inside steps */
+  .modop-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+
+  .modop-list {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0;
+  }
+  .modop-list li {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+    padding: 5px 0 5px 20px;
+    position: relative;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .modop-list li:last-child { border-bottom: none; }
+  .modop-list li::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: var(--text2);
+  }
+
+  .modop-numbered {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0;
+    counter-reset: modop-counter;
+  }
+  .modop-numbered li {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+    padding: 6px 0 6px 32px;
+    position: relative;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    counter-increment: modop-counter;
+  }
+  .modop-numbered li:last-child { border-bottom: none; }
+  .modop-numbered li::before {
+    content: counter(modop-counter);
+    position: absolute;
+    left: 0;
+    width: 22px; height: 22px;
+    background: rgba(0,212,255,0.12);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 50%;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 22px;
+    top: 6px;
+  }
+
+  .modop-alert {
+    border-radius: 7px;
+    padding: 11px 14px;
+    margin: 10px 0;
+    font-size: 12px;
+    line-height: 1.6;
+    border-left: 3px solid;
+  }
+  .modop-alert strong { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; font-family: var(--mono); }
+  .alert-tip { background: rgba(0,212,255,0.07); border-color: var(--accent); color: #a0d8ef; }
+  .alert-tip strong { color: var(--accent); }
+  .alert-warn { background: rgba(255,170,0,0.07); border-color: var(--orange); color: #f0c97a; }
+  .alert-warn strong { color: var(--orange); }
+  .alert-danger { background: rgba(255,61,87,0.07); border-color: var(--red); color: #f0a0a8; }
+  .alert-danger strong { color: var(--red); }
+  .alert-ok { background: rgba(0,230,118,0.07); border-color: var(--green); color: #a0e8c0; }
+  .alert-ok strong { color: var(--green); }
+
+  .modop-code {
+    background: #0a0c10;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 12px 14px;
+    margin: 10px 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #00ff88;
+    white-space: pre;
+    overflow-x: auto;
+    line-height: 1.6;
+  }
+
+  .modop-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 12px;
+  }
+  .modop-table th {
+    background: rgba(0,212,255,0.1);
+    color: var(--accent);
+    padding: 7px 10px;
+    text-align: left;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border: 1px solid var(--border);
+  }
+  .modop-table td {
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+  .modop-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+  .modop-subhead {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 14px 0 6px;
+    font-family: var(--mono);
+    letter-spacing: 0.5px;
+  }
+
+  /* Phase nav bottom */
+  .modop-phase-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:28px;height:28px;background:rgba(0,212,255,0.15);border-radius:5px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,212,255,0.3);">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><polygon points="10,1 19,5.5 19,14.5 10,19 1,14.5 1,5.5" stroke="#00d4ff" stroke-width="1.5" fill="none"/><polygon points="10,5 15,7.5 15,12.5 10,15 5,12.5 5,7.5" stroke="rgba(0,212,255,0.5)" stroke-width="1" fill="none"/></svg>
+      </div>
+      <div>
+        <div class="logo-text" style="color:var(--accent);letter-spacing:3px;font-size:14px;">ESSOR</div>
+        <div class="logo-sub">Diagnostic Vidéosurveillance</div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button id="modopBtn" onclick="toggleModop()" style="background:rgba(255,170,0,0.12);border:1px solid rgba(255,170,0,0.3);color:#ffaa00;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;cursor:pointer;letter-spacing:1px;transition:all 0.2s;">📋 MODE OP</button>
+    <div class="steps-nav" id="stepsNav"></div>
+  </div>
+</header>
+
+<main>
+  <!-- PAGE 1: INFOS SITE -->
+  <div class="page active" id="page1">
+    <div class="section-header">
+      <div class="section-tag">Étape 01 / 04</div>
+      <div class="section-title">Informations du site</div>
+      <div class="section-desc">Renseigner les données générales de l'intervention</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏢 Bailleur & Site</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Nom du bailleur social *</label>
+          <input type="text" id="baillerNom" placeholder="Ex : Paris Habitat, Logirep...">
+        </div>
+        <div class="field">
+          <label>Adresse du site *</label>
+          <input type="text" id="siteAdresse" placeholder="12 rue des Acacias, 75014 Paris">
+        </div>
+        <div class="field">
+          <label>Référence / Num. de site</label>
+          <input type="text" id="siteRef" placeholder="Ex: S-00421">
+        </div>
+        <div class="field">
+          <label>Type de site</label>
+          <select id="siteType">
+            <option value="">-- Sélectionner --</option>
+            <option>Résidence</option>
+            <option>Immeuble collectif</option>
+            <option>Parking souterrain</option>
+            <option>Espace extérieur</option>
+            <option>Hall d'entrée</option>
+            <option>Multi-bâtiments</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">👷 Technicien & Intervention</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Technicien *</label>
+          <input type="text" id="techNom" placeholder="Prénom NOM">
+        </div>
+        <div class="field">
+          <label>Date d'intervention *</label>
+          <input type="date" id="dateIntervention">
+        </div>
+        <div class="field">
+          <label>Heure début</label>
+          <input type="time" id="heureDebut">
+        </div>
+        <div class="field">
+          <label>Heure fin</label>
+          <input type="time" id="heureFin">
+        </div>
+        <div class="field">
+          <label>Numéro d'ordre de mission</label>
+          <input type="text" id="ordreNum" placeholder="OM-2025-XXXX">
+        </div>
+        <div class="field">
+          <label>Contact sur site</label>
+          <input type="text" id="contactSite" placeholder="Nom & tél du gardien / gestionnaire">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 Contexte de la maintenance</div>
+      <div class="form-grid cols-1">
+        <div class="field">
+          <label>Observations préalables / historique</label>
+          <textarea id="obsPrealables" placeholder="Anomalies connues, historique d'interventions précédentes, remarques client..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn btn-primary" onclick="goToPage(2)">Suivant → Enregistreur</button>
+    </div>
+  </div>
+
+  <!-- PAGE 2: NVR/DVR -->
+  <div class="page" id="page2">
+    <div class="section-header">
+      <div class="section-tag">Étape 02 / 04</div>
+      <div class="section-title">Diagnostic NVR / DVR</div>
+      <div class="section-desc">État et paramétrage de l'enregistreur vidéo</div>
+    </div>
+
+    <div class="card" id="nvrList">
+      <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>🖥️ Enregistreurs détectés sur le site</span>
+        <button class="btn btn-secondary btn-sm" onclick="addNVR()">+ Ajouter NVR/DVR</button>
+      </div>
+      <div id="nvrContainer"></div>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn btn-secondary" onclick="goToPage(1)">← Retour</button>
+      <button class="btn btn-primary" onclick="goToPage(3)">Suivant → Caméras</button>
+    </div>
+  </div>
+
+  <!-- PAGE 3: CAMERAS -->
+  <div class="page" id="page3">
+    <div class="section-header">
+      <div class="section-tag">Étape 03 / 04</div>
+      <div class="section-title">Diagnostic caméras</div>
+      <div class="section-desc">Vérification individuelle de chaque caméra du site</div>
+    </div>
+
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-chip">
+        <div class="stat-val" id="statTotal">0</div>
+        <div class="stat-lbl">Total</div>
+      </div>
+      <div class="stat-chip stat-ok">
+        <div class="stat-val" id="statOk">0</div>
+        <div class="stat-lbl">✓ OK</div>
+      </div>
+      <div class="stat-chip stat-ko">
+        <div class="stat-val" id="statKo">0</div>
+        <div class="stat-lbl">✗ KO</div>
+      </div>
+      <div class="stat-chip stat-warn">
+        <div class="stat-val" id="statWarn">0</div>
+        <div class="stat-lbl">⚠ Dégradé</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>📷 Liste des caméras</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="number" id="camBatchCount" min="1" max="64" value="1" style="width:50px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:5px;font-size:12px;text-align:center;">
+          <button class="btn btn-secondary btn-sm" onclick="addCameras()">+ Ajouter</button>
+        </div>
+      </div>
+      <div id="camTableContainer">
+        <table class="cam-table" id="camTable">
+          <thead>
+            <tr>
+              <th style="width:40px">#</th>
+              <th style="width:120px">Nom / ID</th>
+              <th style="width:130px">Emplacement</th>
+              <th style="width:90px">Type</th>
+              <th style="width:80px">Marque</th>
+              <th>État global</th>
+              <th style="width:70px">Détail</th>
+              <th style="width:36px"></th>
+            </tr>
+          </thead>
+          <tbody id="camTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn btn-secondary" onclick="goToPage(2)">← Retour</button>
+      <button class="btn btn-primary" onclick="goToPage(4)">Suivant → Synthèse</button>
+    </div>
+  </div>
+
+  <!-- PAGE 4: SYNTHESE + RAPPORT -->
+  <div class="page" id="page4">
+    <div class="section-header">
+      <div class="section-tag">Étape 04 / 04</div>
+      <div class="section-title">Synthèse & Rapport</div>
+      <div class="section-desc">Récapitulatif du diagnostic et génération du rapport PDF</div>
+    </div>
+
+    <div id="syntheseContent"></div>
+
+    <div class="card">
+      <div class="card-title">📝 Observations finales</div>
+      <div class="form-grid cols-1">
+        <div class="field">
+          <label>Conclusion de l'intervention</label>
+          <textarea id="conclusion" rows="3" placeholder="Synthèse de l'état général du système, préconisations..."></textarea>
+        </div>
+        <div class="field">
+          <label>Actions à planifier (retour intervention)</label>
+          <textarea id="actionsRetour" rows="2" placeholder="Pièces à commander, interventions correctives à prévoir..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">✍️ Signature & Validation</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Visa technicien</label>
+          <input type="text" id="visaTech" placeholder="Signature / initiales">
+        </div>
+        <div class="field">
+          <label>Visa client (si présent)</label>
+          <input type="text" id="visaClient" placeholder="Nom + accord">
+        </div>
+      </div>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn btn-secondary" onclick="goToPage(3)">← Retour</button>
+      <button class="btn btn-success" onclick="generateReport()" style="font-size:14px;padding:12px 24px;">
+        📄 Générer le rapport PDF
+      </button>
+      <button class="btn btn-secondary" onclick="saveData()">💾 Sauvegarder</button>
+    </div>
+  </div>
+</main>
+
+<!-- MODE OPERATOIRE OVERLAY -->
+<div id="modopOverlay">
+  <div class="modop-header">
+    <div>
+      <div class="modop-title">📋 MODE OPÉRATOIRE — ESSOR</div>
+      <div style="font-size:10px;color:var(--text2);margin-top:2px;">ESSOR — Maintenance Préventive Vidéosurveillance</div>
+    </div>
+    <button class="modop-close" onclick="toggleModop()">✕ Fermer</button>
+  </div>
+
+  <div class="modop-body">
+    <div class="modop-tabs" id="modopTabs"></div>
+    <div id="modopPhases"></div>
+  </div>
+</div>
+
+<!-- MODAL DETAIL CAMERA -->
+<div class="modal-overlay" id="camModal">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">🔍 Détail caméra</div>
+
+    <div class="card-title">Points de contrôle</div>
+    <div class="check-grid" id="checkGrid"></div>
+
+    <div class="divider"></div>
+
+    <div class="field" style="margin-bottom:12px;">
+      <label>Anomalies constatées</label>
+      <textarea id="modalAnomalies" rows="2" placeholder="Décrire les problèmes observés..."></textarea>
+    </div>
+
+    <div class="field" style="margin-bottom:12px;">
+      <label>Actions correctives réalisées sur place</label>
+      <textarea id="modalActions" rows="2" placeholder="Nettoyage optique, recâblage, réorientation, reboot..."></textarea>
+    </div>
+
+    <div class="field" style="margin-bottom:16px;">
+      <label>Criticité de l'anomalie</label>
+      <select id="modalCriticite">
+        <option value="">-- Sans anomalie --</option>
+        <option value="faible">Faible — Surveillance dégradée</option>
+        <option value="moyen">Moyen — Zone partiellement couverte</option>
+        <option value="critique">Critique — Zone non couverte</option>
+      </select>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary btn-sm" onclick="saveModal()">✓ Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================== STATE ====================
+let state = {
+  currentPage: 1,
+  totalPages: 4,
+  cameras: [],
+  nvrs: [],
+  modalCamIndex: null
+};
+
+const CHECK_POINTS = [
+  { id: 'image', icon: '🎥', label: 'Image caméra', sub: 'Signal vidéo présent' },
+  { id: 'enregistrement', icon: '💾', label: 'Enregistrement', sub: 'Flux enregistré sur NVR' },
+  { id: 'ir', icon: '🔦', label: 'Vision nocturne IR', sub: 'LEDs IR fonctionnelles' },
+  { id: 'orientation', icon: '🔄', label: 'Orientation / champ', sub: 'Angle de vue correct' },
+  { id: 'optique', icon: '🔭', label: 'Qualité optique', sub: 'Netteté, propreté objectif' },
+  { id: 'cablage', icon: '🔌', label: 'Câblage / connectique', sub: 'Sans arrachement ni corrosion' },
+  { id: 'fixation', icon: '🔧', label: 'Fixation mécanique', sub: 'Support stable, visserie OK' },
+  { id: 'horodatage', icon: '🕐', label: 'Horodatage', sub: 'Date/heure correcte sur flux' },
+];
+
+const CAM_TYPES = ['Dôme', 'Tube', 'Bullet', 'PTZ', 'Fisheye', 'Pinhole', 'Thermique'];
+const CAM_MARQUES = ['Sony', 'Comelit', 'Bosch', 'Hikvision', 'Dahua', 'Axis', 'Hanwha', 'Uniview', 'Autre'];
+const NVR_MARQUES = ['Sony', 'Comelit', 'Bosch', 'Hikvision', 'Dahua', 'Axis', 'Hanwha', 'Autre'];
+
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', () => {
+  // Set today's date
+  document.getElementById('dateIntervention').value = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  document.getElementById('heureDebut').value = now.toTimeString().slice(0, 5);
+
+  renderStepsNav();
+  renderNVRs();
+  renderCameras();
+  addNVR(); // Start with one NVR
+  addCameras(1); // Start with one camera
+});
+
+// ==================== NAVIGATION ====================
+function goToPage(n) {
+  if (n === 4) buildSynthese();
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page' + n).classList.add('active');
+  state.currentPage = n;
+  renderStepsNav();
+  window.scrollTo(0, 0);
+}
+
+function renderStepsNav() {
+  const nav = document.getElementById('stepsNav');
+  nav.innerHTML = '';
+  for (let i = 1; i <= state.totalPages; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'step-dot';
+    if (i < state.currentPage) dot.classList.add('done');
+    if (i === state.currentPage) dot.classList.add('active');
+    dot.onclick = () => goToPage(i);
+    nav.appendChild(dot);
+  }
+}
+
+// ==================== NVR ====================
+function addNVR() {
+  const id = Date.now();
+  state.nvrs.push({
+    id, marque: '', modele: '', ip: '', firmware: '',
+    nbVoies: '', resolution: '', stockage: '', hddEtat: '',
+    connexion: '', etatGeneral: '', notes: ''
+  });
+  renderNVRs();
+}
+
+function removeNVR(id) {
+  state.nvrs = state.nvrs.filter(n => n.id !== id);
+  renderNVRs();
+}
+
+function renderNVRs() {
+  const container = document.getElementById('nvrContainer');
+  if (!state.nvrs.length) {
+    container.innerHTML = '<div style="color:var(--text2);text-align:center;padding:16px;font-size:13px;">Aucun enregistreur — cliquez + Ajouter</div>';
+    return;
+  }
+  container.innerHTML = state.nvrs.map((nvr, idx) => `
+    <div style="border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px;background:var(--surface2);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--accent);">NVR/DVR #${idx + 1}</span>
+        <button class="btn btn-danger btn-sm" onclick="removeNVR(${nvr.id})">✕ Supprimer</button>
+      </div>
+      <div class="nvr-info-grid">
+        <div class="nvr-chip">
+          <label>Marque</label>
+          <select onchange="updateNVR(${nvr.id},'marque',this.value)">
+            <option value="">--</option>
+            ${NVR_MARQUES.map(m => `<option ${nvr.marque===m?'selected':''}>${m}</option>`).join('')}
+          </select>
+        </div>
+        <div class="nvr-chip">
+          <label>Modèle</label>
+          <input type="text" value="${nvr.modele}" placeholder="Ex: NXR-04HD" onchange="updateNVR(${nvr.id},'modele',this.value)">
+        </div>
+        <div class="nvr-chip">
+          <label>Adresse IP</label>
+          <input type="text" value="${nvr.ip}" placeholder="192.168.1.X" onchange="updateNVR(${nvr.id},'ip',this.value)">
+        </div>
+        <div class="nvr-chip">
+          <label>Firmware</label>
+          <input type="text" value="${nvr.firmware}" placeholder="v2.3.1" onchange="updateNVR(${nvr.id},'firmware',this.value)">
+        </div>
+        <div class="nvr-chip">
+          <label>Nb voies</label>
+          <input type="text" value="${nvr.nbVoies}" placeholder="4 / 8 / 16" onchange="updateNVR(${nvr.id},'nbVoies',this.value)">
+        </div>
+        <div class="nvr-chip">
+          <label>Connexion</label>
+          <select onchange="updateNVR(${nvr.id},'connexion',this.value)">
+            <option value="">--</option>
+            <option ${nvr.connexion==='Navigateur web'?'selected':''}>Navigateur web</option>
+            <option ${nvr.connexion==='Logiciel constructeur'?'selected':''}>Logiciel constructeur</option>
+            <option ${nvr.connexion==='ONVIF/API'?'selected':''}>ONVIF/API</option>
+            <option ${nvr.connexion==='Écran local'?'selected':''}>Écran local</option>
+          </select>
+        </div>
+        <div class="nvr-chip">
+          <label>Disques durs</label>
+          <select onchange="updateNVR(${nvr.id},'hddEtat',this.value)">
+            <option value="">--</option>
+            <option ${nvr.hddEtat==='OK'?'selected':''}>OK</option>
+            <option ${nvr.hddEtat==='Dégradé'?'selected':''}>Dégradé</option>
+            <option ${nvr.hddEtat==='En erreur'?'selected':''}>En erreur</option>
+            <option ${nvr.hddEtat==='Absent'?'selected':''}>Absent</option>
+          </select>
+        </div>
+        <div class="nvr-chip">
+          <label>État général</label>
+          <select onchange="updateNVR(${nvr.id},'etatGeneral',this.value)">
+            <option value="">--</option>
+            <option ${nvr.etatGeneral==='Opérationnel'?'selected':''}>Opérationnel</option>
+            <option ${nvr.etatGeneral==='Dégradé'?'selected':''}>Dégradé</option>
+            <option ${nvr.etatGeneral==='Hors service'?'selected':''}>Hors service</option>
+          </select>
+        </div>
+        <div class="nvr-chip">
+          <label>Rétention (jours)</label>
+          <input type="text" value="${nvr.stockage}" placeholder="15j" onchange="updateNVR(${nvr.id},'stockage',this.value)">
+        </div>
+      </div>
+      <div class="field" style="margin-top:8px;">
+        <label style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;display:block;">Notes</label>
+        <textarea style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:8px;font-size:12px;font-family:var(--sans);outline:none;resize:vertical;min-height:50px;" placeholder="Alarmes actives, problèmes réseau, paramètres à noter..." onchange="updateNVR(${nvr.id},'notes',this.value)">${nvr.notes}</textarea>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateNVR(id, key, val) {
+  const nvr = state.nvrs.find(n => n.id === id);
+  if (nvr) nvr[key] = val;
+}
+
+// ==================== CAMERAS ====================
+function addCameras(countOverride) {
+  const count = countOverride !== undefined ? countOverride : (parseInt(document.getElementById('camBatchCount').value) || 1);
+  for (let i = 0; i < count; i++) {
+    state.cameras.push({
+      id: Date.now() + i,
+      nom: '',
+      emplacement: '',
+      type: '',
+      marque: '',
+      etat: '', // ok / ko / warn
+      checks: {},
+      anomalies: '',
+      actions: '',
+      criticite: ''
+    });
+  }
+  renderCameras();
+  updateStats();
+}
+
+function removeCamera(id) {
+  state.cameras = state.cameras.filter(c => c.id !== id);
+  renderCameras();
+  updateStats();
+}
+
+function renderCameras() {
+  const tbody = document.getElementById('camTableBody');
+  if (!state.cameras.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text2);padding:20px;font-size:13px;">Aucune caméra — Ajouter via le bouton ci-dessus</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.cameras.map((cam, idx) => {
+    const badgeClass = cam.etat === 'ok' ? 'status-ok' : cam.etat === 'ko' ? 'status-ko' : cam.etat === 'warn' ? 'status-warn' : 'status-na';
+    const badgeText = cam.etat === 'ok' ? '✓ OK' : cam.etat === 'ko' ? '✗ KO' : cam.etat === 'warn' ? '⚠ DÉGRADÉ' : '— N/A';
+    const hasDetail = cam.anomalies || cam.actions || Object.keys(cam.checks).length > 0;
+
+    return `<tr>
+      <td><span style="font-family:var(--mono);font-size:11px;color:var(--text2);">${String(idx+1).padStart(2,'0')}</span></td>
+      <td><input type="text" value="${cam.nom}" placeholder="CAM-${String(idx+1).padStart(2,'0')}" onchange="updateCam(${cam.id},'nom',this.value)"></td>
+      <td><input type="text" value="${cam.emplacement}" placeholder="Hall / Parking A..." onchange="updateCam(${cam.id},'emplacement',this.value)"></td>
+      <td>
+        <select onchange="updateCam(${cam.id},'type',this.value)">
+          <option value="">--</option>
+          ${CAM_TYPES.map(t => `<option ${cam.type===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        <select onchange="updateCam(${cam.id},'marque',this.value)">
+          <option value="">--</option>
+          ${CAM_MARQUES.map(m => `<option ${cam.marque===m?'selected':''}>${m}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="status-badge ${badgeClass}">${badgeText}</span>
+          <div style="display:flex;gap:3px;">
+            <button class="status-btn btn-ok ${cam.etat==='ok'?'active':''}" onclick="setCamEtat(${cam.id},'ok')">OK</button>
+            <button class="status-btn btn-warn ${cam.etat==='warn'?'active':''}" onclick="setCamEtat(${cam.id},'warn')">⚠</button>
+            <button class="status-btn btn-ko ${cam.etat==='ko'?'active':''}" onclick="setCamEtat(${cam.id},'ko')">KO</button>
+          </div>
+          ${cam.anomalies ? `<span class="anomaly-badge">⚠ anomalie</span>` : ''}
+        </div>
+      </td>
+      <td>
+        <button class="btn btn-secondary btn-sm" onclick="openModal(${cam.id})" style="${hasDetail?'border-color:var(--accent);color:var(--accent)':''}">
+          ${hasDetail ? '📋 Voir' : '+ Détail'}
+        </button>
+      </td>
+      <td>
+        <button onclick="removeCamera(${cam.id})" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px;padding:4px;" title="Supprimer">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  updateStats();
+}
+
+function updateCam(id, key, val) {
+  const cam = state.cameras.find(c => c.id === id);
+  if (cam) cam[key] = val;
+}
+
+function setCamEtat(id, etat) {
+  const cam = state.cameras.find(c => c.id === id);
+  if (cam) { cam.etat = etat; renderCameras(); }
+}
+
+function updateStats() {
+  const total = state.cameras.length;
+  const ok = state.cameras.filter(c => c.etat === 'ok').length;
+  const ko = state.cameras.filter(c => c.etat === 'ko').length;
+  const warn = state.cameras.filter(c => c.etat === 'warn').length;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statOk').textContent = ok;
+  document.getElementById('statKo').textContent = ko;
+  document.getElementById('statWarn').textContent = warn;
+}
+
+// ==================== MODAL ====================
+function openModal(id) {
+  state.modalCamIndex = id;
+  const cam = state.cameras.find(c => c.id === id);
+  const idx = state.cameras.indexOf(cam) + 1;
+
+  document.getElementById('modalTitle').textContent = `🔍 Détail — ${cam.nom || 'CAM-' + String(idx).padStart(2,'0')} (${cam.emplacement || 'emplacement non défini'})`;
+  document.getElementById('modalAnomalies').value = cam.anomalies || '';
+  document.getElementById('modalActions').value = cam.actions || '';
+  document.getElementById('modalCriticite').value = cam.criticite || '';
+
+  const grid = document.getElementById('checkGrid');
+  grid.innerHTML = CHECK_POINTS.map(cp => {
+    const val = cam.checks[cp.id] || '';
+    const cls = val === 'ok' ? 'checked-ok' : val === 'ko' ? 'checked-ko' : val === 'warn' ? 'checked-warn' : '';
+    const iconColor = val === 'ok' ? 'var(--green)' : val === 'ko' ? 'var(--red)' : val === 'warn' ? 'var(--orange)' : '';
+    const iconChar = val === 'ok' ? '✓' : val === 'ko' ? '✗' : val === 'warn' ? '⚠' : cp.icon;
+    return `
+      <div class="check-item ${cls}" id="check-${cp.id}" onclick="cycleCheck('${cp.id}')">
+        <div class="check-icon" style="${iconColor ? 'border-color:'+iconColor+';color:'+iconColor : ''}">${iconChar}</div>
+        <div>
+          <div class="check-label">${cp.label}</div>
+          <div class="check-sub">${cp.sub}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('camModal').classList.add('open');
+}
+
+function cycleCheck(checkId) {
+  const cam = state.cameras.find(c => c.id === state.modalCamIndex);
+  if (!cam) return;
+  const current = cam.checks[checkId] || '';
+  const next = current === '' ? 'ok' : current === 'ok' ? 'warn' : current === 'warn' ? 'ko' : '';
+  cam.checks[checkId] = next;
+
+  const el = document.getElementById('check-' + checkId);
+  el.className = 'check-item' + (next ? ' checked-' + next : '');
+  const icon = el.querySelector('.check-icon');
+  const iconChar = next === 'ok' ? '✓' : next === 'ko' ? '✗' : next === 'warn' ? '⚠' : CHECK_POINTS.find(c=>c.id===checkId).icon;
+  const iconColor = next === 'ok' ? 'var(--green)' : next === 'ko' ? 'var(--red)' : next === 'warn' ? 'var(--orange)' : '';
+  icon.textContent = iconChar;
+  icon.style.borderColor = iconColor;
+  icon.style.color = iconColor;
+
+  // Auto-set etat global
+  const vals = Object.values(cam.checks);
+  if (vals.some(v => v === 'ko')) cam.etat = 'ko';
+  else if (vals.some(v => v === 'warn')) cam.etat = 'warn';
+  else if (vals.filter(v=>v==='ok').length === CHECK_POINTS.length) cam.etat = 'ok';
+}
+
+function closeModal() {
+  document.getElementById('camModal').classList.remove('open');
+  state.modalCamIndex = null;
+}
+
+function saveModal() {
+  const cam = state.cameras.find(c => c.id === state.modalCamIndex);
+  if (cam) {
+    cam.anomalies = document.getElementById('modalAnomalies').value;
+    cam.actions = document.getElementById('modalActions').value;
+    cam.criticite = document.getElementById('modalCriticite').value;
+  }
+  closeModal();
+  renderCameras();
+  showToast('Détail caméra enregistré ✓');
+}
+
+// ==================== SYNTHESE ====================
+function buildSynthese() {
+  const total = state.cameras.length;
+  const ok = state.cameras.filter(c => c.etat === 'ok').length;
+  const ko = state.cameras.filter(c => c.etat === 'ko').length;
+  const warn = state.cameras.filter(c => c.etat === 'warn').length;
+  const pct = total ? Math.round((ok / total) * 100) : 0;
+
+  const camKo = state.cameras.filter(c => c.etat === 'ko' || c.etat === 'warn');
+
+  document.getElementById('syntheseContent').innerHTML = `
+    <div class="card">
+      <div class="card-title">📊 Résumé du diagnostic</div>
+      <div class="summary-section">
+        <div class="summary-title">Informations site</div>
+        <div class="summary-row"><span class="key">Bailleur</span><span class="val">${val('baillerNom') || '—'}</span></div>
+        <div class="summary-row"><span class="key">Adresse</span><span class="val">${val('siteAdresse') || '—'}</span></div>
+        <div class="summary-row"><span class="key">Technicien</span><span class="val">${val('techNom') || '—'}</span></div>
+        <div class="summary-row"><span class="key">Date</span><span class="val">${val('dateIntervention') || '—'}</span></div>
+      </div>
+      <div class="summary-section">
+        <div class="summary-title">État des caméras</div>
+        <div class="summary-row"><span class="key">Total caméras</span><span class="val">${total}</span></div>
+        <div class="summary-row"><span class="key">✓ Opérationnelles</span><span class="val" style="color:var(--green)">${ok} (${pct}%)</span></div>
+        <div class="summary-row"><span class="key">⚠ Dégradées</span><span class="val" style="color:var(--orange)">${warn}</span></div>
+        <div class="summary-row"><span class="key">✗ Hors service</span><span class="val" style="color:var(--red)">${ko}</span></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div style="font-size:11px;color:var(--text2);margin-top:4px;font-family:var(--mono);">${pct}% du parc opérationnel</div>
+    </div>
+
+    ${camKo.length ? `
+    <div class="card">
+      <div class="card-title" style="color:var(--red);">⚠ Caméras en anomalie (${camKo.length})</div>
+      <div class="intervention-list">
+        ${camKo.map((cam, i) => `
+          <div class="intervention-item">
+            <span class="intervention-number">${String(i+1).padStart(2,'0')}</span>
+            <div>
+              <div style="font-weight:600;margin-bottom:3px;">
+                ${cam.nom || 'Sans nom'} 
+                <span class="status-badge ${cam.etat==='ko'?'status-ko':'status-warn'}" style="margin-left:6px;">${cam.etat==='ko'?'✗ KO':'⚠ DÉGRADÉ'}</span>
+                ${cam.criticite ? `<span class="anomaly-badge" style="margin-left:4px;">${cam.criticite}</span>` : ''}
+              </div>
+              <div style="font-size:12px;color:var(--text2);">📍 ${cam.emplacement || 'Emplacement non défini'} · ${cam.type || ''} ${cam.marque || ''}</div>
+              ${cam.anomalies ? `<div style="margin-top:5px;font-size:12px;"><span style="color:var(--text2);">Anomalie :</span> ${cam.anomalies}</div>` : ''}
+              ${cam.actions ? `<div style="margin-top:2px;font-size:12px;"><span style="color:var(--green);">Action réalisée :</span> ${cam.actions}</div>` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    ` : '<div class="card" style="border-color:var(--green);"><div style="color:var(--green);font-weight:600;">✓ Toutes les caméras sont opérationnelles</div></div>'}
+  `;
+}
+
+function val(id) {
+  return document.getElementById(id)?.value || '';
+}
+
+// ==================== RAPPORT PDF ====================
+function generateReport() {
+  const data = collectData();
+
+  // Send to Python for PDF generation
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '#';
+
+  // We'll encode data as JSON and use it
+  showToast('Rapport généré ! Voir le fichier téléchargé.');
+
+  // Generate HTML report for printing as PDF
+  const htmlReport = buildHTMLReport(data);
+  const blob = new Blob([htmlReport], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const dateStr = data.site.date ? data.site.date.replace(/-/g,'') : new Date().toISOString().slice(0,10).replace(/-/g,'');
+  const siteSlug = (data.site.bailleur || 'site').replace(/\s+/g, '_').toLowerCase();
+  a.download = `ESSOR_Diagnostic_${siteSlug}_${dateStr}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function collectData() {
+  return {
+    site: {
+      bailleur: val('baillerNom'),
+      adresse: val('siteAdresse'),
+      ref: val('siteRef'),
+      type: val('siteType'),
+      technicien: val('techNom'),
+      date: val('dateIntervention'),
+      heureDebut: val('heureDebut'),
+      heureFin: val('heureFin'),
+      ordre: val('ordreNum'),
+      contact: val('contactSite'),
+      obsPrealables: val('obsPrealables'),
+    },
+    nvrs: state.nvrs,
+    cameras: state.cameras,
+    conclusion: val('conclusion'),
+    actionsRetour: val('actionsRetour'),
+    visaTech: val('visaTech'),
+    visaClient: val('visaClient'),
+  };
+}
+
+function buildHTMLReport(data) {
+  const total = data.cameras.length;
+  const ok = data.cameras.filter(c => c.etat === 'ok').length;
+  const ko = data.cameras.filter(c => c.etat === 'ko').length;
+  const warn = data.cameras.filter(c => c.etat === 'warn').length;
+  const pct = total ? Math.round((ok / total) * 100) : 0;
+  const dateFormatted = data.site.date ? new Date(data.site.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'}) : '—';
+  const genDate = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+  const genTime = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+
+  const clLabel = (v) => v==='ok'?'✓':v==='ko'?'✗':v==='warn'?'!':'–';
+  const clBg    = (v) => v==='ok'?'#eaf6ef':v==='ko'?'#fdecea':v==='warn'?'#fff8e1':'#f3f4f6';
+  const clColor = (v) => v==='ok'?'#166534':v==='ko'?'#991b1b':v==='warn'?'#92400e':'#9ca3af';
+
+  const scoreColor = pct>=90?'#166534':pct>=70?'#92400e':'#991b1b';
+  const scoreBg    = pct>=90?'#eaf6ef':pct>=70?'#fff8e1':'#fdecea';
+  const scoreBorder= pct>=90?'#86efac':pct>=70?'#fcd34d':'#fca5a5';
+  const scoreLabel = pct>=90?'Excellent':pct>=70?'Satisfaisant':pct>=50?'Dégradé':'Critique';
+
+  const camAnomalie = data.cameras.filter(c => c.etat==='ko'||c.etat==='warn');
+
+  const CHECK_LABELS = {
+    image:'Image', enregistrement:'Enreg.', ir:'IR nuit',
+    orientation:'Orient.', optique:'Optique', cablage:'Câblage',
+    fixation:'Fixation', horodatage:'Horodat.'
+  };
+
+  const etatBadge = (etat) => {
+    if (etat==='ok')   return `<span style="display:inline-flex;align-items:center;gap:4px;background:#eaf6ef;color:#166534;border:1px solid #86efac;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:.5px;">✓ OPÉRATIONNEL</span>`;
+    if (etat==='ko')   return `<span style="display:inline-flex;align-items:center;gap:4px;background:#fdecea;color:#991b1b;border:1px solid #fca5a5;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:.5px;">✗ HORS SERVICE</span>`;
+    if (etat==='warn') return `<span style="display:inline-flex;align-items:center;gap:4px;background:#fff8e1;color:#92400e;border:1px solid #fcd34d;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:.5px;">! DÉGRADÉ</span>`;
+    return `<span style="display:inline-flex;align-items:center;gap:4px;background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:.5px;">– N/A</span>`;
+  };
+
+  const nvrBadge = (v, ok, warn, ko) => {
+    if(v===ok)   return `<span style="background:#eaf6ef;color:#166534;border:1px solid #86efac;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;">${v}</span>`;
+    if(v===warn) return `<span style="background:#fff8e1;color:#92400e;border:1px solid #fcd34d;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;">${v}</span>`;
+    if(v===ko)   return `<span style="background:#fdecea;color:#991b1b;border:1px solid #fca5a5;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;">${v}</span>`;
+    return `<span style="background:#f3f4f6;color:#6b7280;border-radius:4px;padding:2px 8px;font-size:10px;">—</span>`;
+  };
+
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rapport de Maintenance — ${data.site.bailleur||'Site'} — ${data.site.date||''}</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#0f1c3f;
+  --navy2:#1a2d5a;
+  --accent:#1e6fc4;
+  --accent-light:#e8f1fb;
+  --green:#166534;--green-bg:#eaf6ef;--green-border:#86efac;
+  --red:#991b1b;  --red-bg:#fdecea;  --red-border:#fca5a5;
+  --amber:#92400e;--amber-bg:#fff8e1;--amber-border:#fcd34d;
+  --gray:#6b7280; --gray-bg:#f3f4f6; --gray-border:#d1d5db;
+  --text:#111827; --text2:#374151; --text3:#6b7280;
+  --border:#e5e7eb;
+}
+
+body{font-family:'Inter',sans-serif;font-size:10.5pt;color:var(--text);background:#f8fafc;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+
+@media print{
+  .no-print{display:none!important;}
+  body{background:#fff;font-size:9.5pt;}
+  .page-break{page-break-before:always;padding-top:20px;}
+  .avoid-break{page-break-inside:avoid;}
+}
+@page{
+  margin:16mm 14mm;
+  size:A4;
+}
+
+/* WRAPPER */
+.doc{max-width:820px;margin:0 auto;background:#fff;}
+
+/* ===== COVER PAGE ===== */
+.cover{
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 60%,#243b80 100%);
+  color:white;
+  padding:0;
+  position:relative;
+  overflow:hidden;
+  min-height:200px;
+}
+
+.cover-accent-bar{
+  position:absolute;top:0;left:0;right:0;
+  height:5px;
+  background:linear-gradient(90deg,#3b82f6,#06b6d4,#10b981);
+}
+
+.cover-content{
+  padding:40px 44px 36px;
+  position:relative;
+  z-index:1;
+}
+
+.cover-grid{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:24px;
+  align-items:flex-start;
+}
+
+.cover-badge{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  letter-spacing:3px;
+  color:rgba(255,255,255,0.5);
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+
+.cover-logo{
+  font-family:'JetBrains Mono',monospace;
+  font-size:28px;
+  font-weight:600;
+  color:white;
+  letter-spacing:4px;
+  line-height:1;
+}
+
+.cover-title{
+  font-size:14px;
+  font-weight:300;
+  color:rgba(255,255,255,0.7);
+  margin-top:6px;
+  letter-spacing:0.5px;
+}
+
+.cover-site-block{
+  margin-top:24px;
+  padding-top:20px;
+  border-top:1px solid rgba(255,255,255,0.12);
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:20px;
+}
+
+.cover-field label{
+  font-size:8px;
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  color:rgba(255,255,255,0.45);
+  display:block;
+  margin-bottom:3px;
+}
+
+.cover-field span{
+  font-size:12px;
+  font-weight:500;
+  color:rgba(255,255,255,0.9);
+}
+
+.cover-ref-block{
+  text-align:right;
+}
+
+.cover-ref{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  color:rgba(255,255,255,0.5);
+  margin-bottom:4px;
+}
+
+.cover-ref strong{
+  font-size:14px;
+  color:white;
+  display:block;
+  font-family:'JetBrains Mono',monospace;
+}
+
+.cover-date{
+  font-size:11px;
+  color:rgba(255,255,255,0.6);
+  margin-top:8px;
+}
+
+/* ===== SCORE BANNER ===== */
+.score-banner{
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  padding:20px 44px;
+  display:grid;
+  grid-template-columns:auto 1fr auto auto auto;
+  gap:24px;
+  align-items:center;
+}
+
+.score-circle{
+  width:72px;height:72px;
+  border-radius:50%;
+  background:${scoreBg};
+  border:2px solid ${scoreBorder};
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+
+.score-pct{
+  font-family:'JetBrains Mono',monospace;
+  font-size:20px;font-weight:700;
+  color:${scoreColor};
+  line-height:1;
+}
+
+.score-lbl{
+  font-size:8px;font-weight:600;
+  color:${scoreColor};
+  letter-spacing:.5px;
+  margin-top:1px;
+}
+
+.score-bar-wrap{flex:1;}
+
+.score-bar-label{
+  font-size:11px;font-weight:600;color:var(--text);
+  margin-bottom:6px;
+}
+
+.score-bar-label span{
+  font-size:10px;font-weight:400;color:var(--text3);margin-left:8px;
+}
+
+.score-bar-track{
+  height:8px;background:var(--gray-bg);border-radius:4px;overflow:hidden;
+}
+
+.score-bar-fill{
+  height:100%;width:${pct}%;
+  background:${pct>=90?'linear-gradient(90deg,#16a34a,#22c55e)':pct>=70?'linear-gradient(90deg,#d97706,#f59e0b)':'linear-gradient(90deg,#dc2626,#ef4444)'};
+  border-radius:4px;
+  transition:width .3s;
+}
+
+.kpi{
+  text-align:center;
+  padding:8px 16px;
+  border-radius:8px;
+  min-width:70px;
+}
+
+.kpi-n{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;line-height:1;}
+.kpi-l{font-size:9px;text-transform:uppercase;letter-spacing:.8px;margin-top:2px;font-weight:500;}
+.kpi-total{background:#f8fafc;border:1px solid var(--border);}
+.kpi-total .kpi-n{color:var(--text);}
+.kpi-total .kpi-l{color:var(--text3);}
+.kpi-ok{background:var(--green-bg);border:1px solid var(--green-border);}
+.kpi-ok .kpi-n{color:var(--green);}
+.kpi-ok .kpi-l{color:var(--green);}
+.kpi-warn{background:var(--amber-bg);border:1px solid var(--amber-border);}
+.kpi-warn .kpi-n{color:var(--amber);}
+.kpi-warn .kpi-l{color:var(--amber);}
+.kpi-ko{background:var(--red-bg);border:1px solid var(--red-border);}
+.kpi-ko .kpi-n{color:var(--red);}
+.kpi-ko .kpi-l{color:var(--red);}
+
+/* ===== BODY ===== */
+.body{padding:28px 44px 44px;}
+
+/* SECTION */
+.sec{margin-bottom:28px;}
+
+.sec-title{
+  display:flex;align-items:center;gap:10px;
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;
+  color:var(--accent);
+  padding-bottom:8px;
+  border-bottom:2px solid var(--accent-light);
+  margin-bottom:14px;
+}
+
+.sec-title::before{
+  content:'';
+  width:3px;height:14px;
+  background:var(--accent);
+  border-radius:2px;
+  flex-shrink:0;
+}
+
+/* INFO TABLE */
+.info-2col{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.info-item{
+  background:#f8fafc;
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:9px 12px;
+}
+
+.info-item label{
+  font-size:8.5px;text-transform:uppercase;letter-spacing:1px;
+  color:var(--text3);display:block;margin-bottom:2px;font-weight:500;
+}
+
+.info-item span{
+  font-size:10.5px;font-weight:500;color:var(--text);
+}
+
+.obs-block{
+  background:#f8fafc;border:1px solid var(--border);
+  border-radius:6px;padding:10px 14px;margin-top:8px;
+}
+.obs-block label{font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);display:block;margin-bottom:4px;font-weight:500;}
+.obs-block p{font-size:10.5px;color:var(--text2);line-height:1.6;}
+
+/* NVR TABLE */
+.data-table{
+  width:100%;border-collapse:collapse;font-size:9.5px;
+}
+.data-table th{
+  background:var(--navy);color:white;
+  padding:7px 10px;text-align:left;
+  font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;font-weight:600;
+}
+.data-table th:first-child{border-radius:6px 0 0 0;}
+.data-table th:last-child{border-radius:0 6px 0 0;}
+.data-table td{
+  padding:8px 10px;
+  border-bottom:1px solid var(--border);
+  vertical-align:middle;color:var(--text2);
+}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:#f8fafc;}
+.data-table .notes-row td{
+  background:#fffbeb;font-size:9px;
+  color:#78350f;padding:5px 10px;
+  border-left:3px solid #fcd34d;
+}
+.mono{font-family:'JetBrains Mono',monospace;font-size:9px;}
+
+/* CAMERA CARDS */
+.cam-grid{
+  display:flex;flex-direction:column;gap:10px;
+}
+
+.cam-card{
+  border:1px solid var(--border);
+  border-radius:8px;overflow:hidden;
+  background:#fff;
+}
+
+.cam-card.cam-ok   {border-left:3px solid #22c55e;}
+.cam-card.cam-ko   {border-left:3px solid #ef4444;}
+.cam-card.cam-warn {border-left:3px solid #f59e0b;}
+.cam-card.cam-na   {border-left:3px solid #d1d5db;}
+
+.cam-head{
+  display:grid;
+  grid-template-columns:36px 1fr auto auto;
+  gap:12px;align-items:center;
+  padding:10px 14px;
+  background:#f8fafc;
+  border-bottom:1px solid var(--border);
+}
+
+.cam-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;font-weight:600;
+  color:var(--text3);text-align:center;
+}
+
+.cam-name{font-size:11px;font-weight:600;color:var(--text);}
+.cam-loc{font-size:9.5px;color:var(--text3);margin-top:1px;}
+
+.cam-type-badge{
+  font-size:9px;padding:3px 8px;
+  border-radius:4px;background:var(--gray-bg);
+  color:var(--text3);border:1px solid var(--gray-border);
+  font-weight:500;white-space:nowrap;
+}
+
+.cam-body{
+  padding:10px 14px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.checks-row{
+  display:flex;flex-wrap:wrap;gap:5px;
+}
+
+.check-pill{
+  font-size:9px;font-weight:600;
+  padding:3px 8px;border-radius:20px;
+  font-family:'JetBrains Mono',monospace;
+  border:1px solid;white-space:nowrap;
+}
+
+.anomaly-box{
+  grid-column:1/-1;
+  background:#fffbeb;
+  border:1px solid #fcd34d;
+  border-radius:6px;
+  padding:8px 12px;
+  font-size:9.5px;
+}
+.anomaly-box .anom-label{font-weight:700;color:#92400e;font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;}
+.anomaly-box .anom-text{color:#78350f;line-height:1.5;}
+
+.action-box{
+  grid-column:1/-1;
+  background:#eaf6ef;
+  border:1px solid #86efac;
+  border-radius:6px;
+  padding:8px 12px;
+  font-size:9.5px;
+}
+.action-box .act-label{font-weight:700;color:#166534;font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;}
+.action-box .act-text{color:#14532d;line-height:1.5;}
+
+/* ANOMALIES PRIORITAIRES */
+.prio-table{
+  width:100%;border-collapse:collapse;font-size:9.5px;
+}
+.prio-table th{
+  background:#1f2937;color:#f9fafb;
+  padding:8px 12px;text-align:left;
+  font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;
+}
+.prio-table th:first-child{border-radius:6px 0 0 0;}
+.prio-table th:last-child{border-radius:0 6px 0 0;}
+.prio-table td{
+  padding:9px 12px;
+  border-bottom:1px solid var(--border);
+  vertical-align:top;
+}
+.prio-table tr.prio-ko td{background:#fef2f2;}
+.prio-table tr.prio-warn td{background:#fffbeb;}
+.prio-table tr:last-child td{border-bottom:none;}
+
+.crit-badge{
+  font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace;
+  padding:3px 8px;border-radius:4px;white-space:nowrap;
+}
+.crit-critique{background:#fdecea;color:#991b1b;border:1px solid #fca5a5;}
+.crit-moyen{background:#fff8e1;color:#92400e;border:1px solid #fcd34d;}
+.crit-faible{background:#eaf6ef;color:#166534;border:1px solid #86efac;}
+.crit-na{background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db;}
+
+/* CONCLUSION */
+.conclusion-box{
+  background:linear-gradient(135deg,#f0f7ff,#e8f1fb);
+  border:1px solid #bfdbfe;
+  border-left:4px solid var(--accent);
+  border-radius:8px;
+  padding:16px 18px;
+  margin-bottom:12px;
+}
+.conclusion-box label{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent);display:block;margin-bottom:6px;}
+.conclusion-box p{font-size:10.5px;color:var(--text2);line-height:1.7;}
+
+.actions-box{
+  background:#f0fdf4;
+  border:1px solid #bbf7d0;
+  border-left:4px solid #16a34a;
+  border-radius:8px;
+  padding:16px 18px;
+}
+.actions-box label{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#166534;display:block;margin-bottom:6px;}
+.actions-box p{font-size:10.5px;color:#14532d;line-height:1.7;}
+
+/* SIGNATURES */
+.sign-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+.sign-card{
+  border:1px solid var(--border);border-radius:8px;overflow:hidden;
+}
+
+.sign-head{
+  background:var(--navy);color:white;
+  padding:8px 14px;
+  font-size:9px;text-transform:uppercase;letter-spacing:1px;font-weight:600;
+}
+
+.sign-body{
+  padding:14px;min-height:64px;
+  background:#fff;
+  display:flex;flex-direction:column;justify-content:space-between;
+}
+
+.sign-value{font-size:14px;font-weight:600;color:var(--text);font-family:'JetBrains Mono',monospace;}
+.sign-line{
+  border-bottom:1px dashed var(--gray-border);
+  margin-top:auto;padding-top:8px;
+  font-size:8.5px;color:var(--text3);
+}
+
+/* FOOTER */
+.doc-footer{
+  background:var(--navy);
+  padding:14px 44px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+
+.doc-footer span{
+  font-family:'JetBrains Mono',monospace;
+  font-size:8px;color:rgba(255,255,255,0.4);
+  letter-spacing:.5px;
+}
+
+/* PRINT BUTTON */
+.print-bar{
+  background:#1e293b;
+  padding:12px 44px;
+  display:flex;gap:12px;align-items:center;
+}
+.pbtn{
+  padding:9px 20px;border:none;border-radius:6px;
+  font-family:'Inter',sans-serif;font-size:12px;font-weight:600;
+  cursor:pointer;transition:opacity .15s;
+}
+.pbtn:hover{opacity:.85;}
+.pbtn-primary{background:#3b82f6;color:#fff;}
+.pbtn-ghost{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);}
+.pbtn-hint{font-size:11px;color:rgba(255,255,255,.4);margin-left:4px;}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<!-- PRINT BAR -->
+<div class="print-bar no-print">
+  <button class="pbtn pbtn-primary" onclick="window.print()">🖨 Imprimer / Enregistrer en PDF</button>
+  <button class="pbtn pbtn-ghost" onclick="window.close()">✕ Fermer</button>
+  <span class="pbtn-hint">Dans la boîte d'impression → décocher "En-têtes et pieds de page" → activer les arrière-plans</span>
+</div>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-accent-bar"></div>
+  <div class="cover-content">
+    <div class="cover-grid">
+      <div>
+        <div class="cover-badge">Rapport de Maintenance Préventive — ESSOR</div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="width:36px;height:36px;background:rgba(255,255,255,0.15);border-radius:6px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.2);"><svg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" fill=\"none\"><polygon points=\"10,1 19,5.5 19,14.5 10,19 1,14.5 1,5.5\" stroke=\"rgba(255,255,255,0.8)\" stroke-width=\"1.5\" fill=\"none\"/><polygon points=\"10,5 15,7.5 15,12.5 10,15 5,12.5 5,7.5\" stroke=\"rgba(255,255,255,0.5)\" stroke-width=\"1\" fill=\"none\"/></svg></div><div><div style="font-family:monospace;font-size:22px;font-weight:700;color:white;letter-spacing:4px;line-height:1;">ESSOR</div><div style="font-family:monospace;font-size:11px;font-weight:300;color:rgba(255,255,255,0.5);letter-spacing:2px;">Diagnostic</div></div></div>
+        <div class="cover-title">Système de Vidéosurveillance — Diagnostic Complet</div>
+      </div>
+      <div class="cover-ref-block">
+        <div class="cover-ref">Ordre de mission<strong>${data.site.ordre||'—'}</strong></div>
+        <div class="cover-ref">Réf. site<strong>${data.site.ref||'—'}</strong></div>
+        <div class="cover-date">${dateFormatted}</div>
+      </div>
+    </div>
+    <div class="cover-site-block">
+      <div class="cover-field"><label>Bailleur social</label><span>${data.site.bailleur||'—'}</span></div>
+      <div class="cover-field"><label>Adresse du site</label><span>${data.site.adresse||'—'}</span></div>
+      <div class="cover-field"><label>Technicien</label><span>${data.site.technicien||'—'}</span></div>
+      <div class="cover-field"><label>Type de site</label><span>${data.site.type||'—'}</span></div>
+      <div class="cover-field"><label>Horaires</label><span>${data.site.heureDebut||'—'} → ${data.site.heureFin||'—'}</span></div>
+      <div class="cover-field"><label>Contact sur site</label><span>${data.site.contact||'—'}</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCORE BANNER -->
+<div class="score-banner">
+  <div class="score-circle">
+    <div class="score-pct">${pct}%</div>
+    <div class="score-lbl">${scoreLabel}</div>
+  </div>
+  <div class="score-bar-wrap">
+    <div class="score-bar-label">Taux d'opérabilité du parc vidéo <span>${ok} caméras opérationnelles sur ${total}</span></div>
+    <div class="score-bar-track"><div class="score-bar-fill"></div></div>
+  </div>
+  <div class="kpi kpi-total"><div class="kpi-n">${total}</div><div class="kpi-l">Total</div></div>
+  <div class="kpi kpi-ok"><div class="kpi-n">${ok}</div><div class="kpi-l">✓ OK</div></div>
+  <div class="kpi kpi-warn"><div class="kpi-n">${warn}</div><div class="kpi-l">! Dégradé</div></div>
+  <div class="kpi kpi-ko"><div class="kpi-n">${ko}</div><div class="kpi-l">✗ KO</div></div>
+</div>
+
+<!-- BODY -->
+<div class="body">
+
+  <!-- INFOS SITE -->
+  <div class="sec avoid-break">
+    <div class="sec-title">Informations de l'intervention</div>
+    <div class="info-2col">
+      <div class="info-item"><label>Bailleur social</label><span>${data.site.bailleur||'—'}</span></div>
+      <div class="info-item"><label>Adresse du site</label><span>${data.site.adresse||'—'}</span></div>
+      <div class="info-item"><label>Référence site</label><span>${data.site.ref||'—'}</span></div>
+      <div class="info-item"><label>Type de site</label><span>${data.site.type||'—'}</span></div>
+      <div class="info-item"><label>Technicien</label><span>${data.site.technicien||'—'}</span></div>
+      <div class="info-item"><label>Date d'intervention</label><span>${dateFormatted}</span></div>
+      <div class="info-item"><label>Plage horaire</label><span>${data.site.heureDebut||'—'} → ${data.site.heureFin||'—'}</span></div>
+      <div class="info-item"><label>Ordre de mission</label><span>${data.site.ordre||'—'}</span></div>
+      <div class="info-item"><label>Contact sur site</label><span>${data.site.contact||'—'}</span></div>
+    </div>
+    ${data.site.obsPrealables?`<div class="obs-block"><label>Observations préalables</label><p>${data.site.obsPrealables}</p></div>`:''}
+  </div>
+
+  <!-- NVR/DVR -->
+  ${data.nvrs.length?`
+  <div class="sec avoid-break">
+    <div class="sec-title">Enregistreurs (NVR / DVR)</div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th><th>Marque / Modèle</th><th>Adresse IP</th>
+          <th>Firmware</th><th>Voies</th><th>Connexion</th>
+          <th>Disques</th><th>Rétention</th><th>État</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.nvrs.map((nvr,i)=>`
+          <tr>
+            <td class="mono" style="color:var(--text3);">${String(i+1).padStart(2,'0')}</td>
+            <td><strong>${nvr.marque||'—'}</strong>${nvr.modele?` <span style="color:var(--text3);">${nvr.modele}</span>`:''}</td>
+            <td class="mono">${nvr.ip||'—'}</td>
+            <td class="mono">${nvr.firmware||'—'}</td>
+            <td style="text-align:center;">${nvr.nbVoies||'—'}</td>
+            <td>${nvr.connexion||'—'}</td>
+            <td>${nvrBadge(nvr.hddEtat,'OK','Dégradé','En erreur')}</td>
+            <td style="text-align:center;font-weight:600;">${nvr.stockage||'—'}</td>
+            <td>${nvrBadge(nvr.etatGeneral,'Opérationnel','Dégradé','Hors service')}</td>
+          </tr>
+          ${nvr.notes?`<tr class="notes-row"><td colspan="9">📝 ${nvr.notes}</td></tr>`:''}
+        `).join('')}
+      </tbody>
+    </table>
+  </div>
+  `:''}
+
+  <!-- ANOMALIES PRIORITAIRES -->
+  ${camAnomalie.length?`
+  <div class="sec avoid-break">
+    <div class="sec-title">Anomalies à traiter — ${camAnomalie.length} caméra${camAnomalie.length>1?'s':''} concernée${camAnomalie.length>1?'s':''}</div>
+    <table class="prio-table">
+      <thead>
+        <tr><th>#</th><th>Caméra</th><th>Emplacement</th><th>État</th><th>Criticité</th><th>Anomalie constatée</th><th>Action réalisée</th></tr>
+      </thead>
+      <tbody>
+        ${camAnomalie.map((cam,i)=>`
+          <tr class="${cam.etat==='ko'?'prio-ko':'prio-warn'}">
+            <td class="mono" style="color:var(--text3);">${String(i+1).padStart(2,'0')}</td>
+            <td><strong>${cam.nom||'CAM-'+String(data.cameras.indexOf(cam)+1).padStart(2,'0')}</strong><br><span style="font-size:8.5px;color:var(--text3);">${cam.type||''} ${cam.marque||''}</span></td>
+            <td style="font-size:9.5px;">${cam.emplacement||'—'}</td>
+            <td>${cam.etat==='ko'?`<span class="crit-badge crit-critique">✗ KO</span>`:`<span class="crit-badge crit-moyen">! DÉGRADÉ</span>`}</td>
+            <td>${cam.criticite?`<span class="crit-badge ${cam.criticite==='critique'?'crit-critique':cam.criticite==='moyen'?'crit-moyen':'crit-faible'}">${cam.criticite}</span>`:`<span class="crit-badge crit-na">—</span>`}</td>
+            <td style="font-size:9.5px;">${cam.anomalies||'—'}</td>
+            <td style="font-size:9.5px;">${cam.actions||'—'}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  </div>
+  `:''}
+
+  <!-- DETAIL CAMERAS -->
+  <div class="sec page-break">
+    <div class="sec-title">État détaillé de chaque caméra</div>
+    <div class="cam-grid">
+      ${data.cameras.map((cam,i)=>{
+        const cls = cam.etat==='ok'?'cam-ok':cam.etat==='ko'?'cam-ko':cam.etat==='warn'?'cam-warn':'cam-na';
+        const checks = Object.entries(cam.checks||{});
+        return `
+        <div class="cam-card ${cls} avoid-break">
+          <div class="cam-head">
+            <div class="cam-num">${String(i+1).padStart(2,'0')}</div>
+            <div>
+              <div class="cam-name">${cam.nom||'CAM-'+String(i+1).padStart(2,'0')}</div>
+              <div class="cam-loc">${cam.emplacement||'Emplacement non renseigné'}</div>
+            </div>
+            <div class="cam-type-badge">${[cam.type,cam.marque].filter(Boolean).join(' · ')||'—'}</div>
+            <div>${cam.etat?`${cam.etat==='ok'?`<span style="background:#eaf6ef;color:#166534;border:1px solid #86efac;border-radius:20px;padding:3px 10px;font-size:9px;font-weight:700;">✓ OK</span>`:cam.etat==='ko'?`<span style="background:#fdecea;color:#991b1b;border:1px solid #fca5a5;border-radius:20px;padding:3px 10px;font-size:9px;font-weight:700;">✗ KO</span>`:`<span style="background:#fff8e1;color:#92400e;border:1px solid #fcd34d;border-radius:20px;padding:3px 10px;font-size:9px;font-weight:700;">! DÉGRADÉ</span>`}`:'<span style="background:#f3f4f6;color:#9ca3af;border-radius:20px;padding:3px 10px;font-size:9px;">—</span>'}</div>
+          </div>
+          <div class="cam-body">
+            <div>
+              <div style="font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);font-weight:600;margin-bottom:5px;">Points de contrôle</div>
+              <div class="checks-row">
+                ${checks.length ? checks.map(([k,v])=>`
+                  <span class="check-pill" style="background:${clBg(v)};color:${clColor(v)};border-color:${clColor(v)}30;">
+                    ${clLabel(v)} ${CHECK_LABELS[k]||k}
+                  </span>`).join('') : '<span style="font-size:9px;color:var(--text3);">Non renseigné</span>'}
+              </div>
+            </div>
+            <div></div>
+            ${cam.anomalies?`<div class="anomaly-box"><div class="anom-label">Anomalie constatée</div><div class="anom-text">${cam.anomalies}</div></div>`:''}
+            ${cam.actions?`<div class="action-box"><div class="act-label">Action réalisée sur place</div><div class="act-text">${cam.actions}</div></div>`:''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+
+  <!-- CONCLUSION -->
+  ${(data.conclusion||data.actionsRetour)?`
+  <div class="sec avoid-break">
+    <div class="sec-title">Conclusion & Préconisations</div>
+    ${data.conclusion?`<div class="conclusion-box"><label>Conclusion de l'intervention</label><p>${data.conclusion}</p></div>`:''}
+    ${data.actionsRetour?`<div class="actions-box"><label>Actions à planifier — retour intervention</label><p>${data.actionsRetour}</p></div>`:''}
+  </div>
+  `:''}
+
+  <!-- SIGNATURES -->
+  <div class="sec avoid-break">
+    <div class="sec-title">Validation & Signatures</div>
+    <div class="sign-grid">
+      <div class="sign-card">
+        <div class="sign-head">Technicien intervenant</div>
+        <div class="sign-body">
+          <div style="font-size:9.5px;color:var(--text3);margin-bottom:6px;">${data.site.technicien||'—'} · ${dateFormatted}</div>
+          <div class="sign-value">${data.visaTech||''}</div>
+          <div class="sign-line">Signature / Visa du technicien</div>
+        </div>
+      </div>
+      <div class="sign-card">
+        <div class="sign-head">Représentant du bailleur</div>
+        <div class="sign-body">
+          <div style="font-size:9.5px;color:var(--text3);margin-bottom:6px;">${data.site.contact||'Contact non renseigné'}</div>
+          <div class="sign-value">${data.visaClient||''}</div>
+          <div class="sign-line">Signature / Bon pour accord</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /body -->
+
+<!-- FOOTER -->
+<div class="doc-footer">
+  <span>ESSOR Diagnostic — Rapport généré le ${genDate} à ${genTime}</span>
+  <span>${data.site.bailleur||''} · ${data.site.adresse||''}</span>
+  <span>Réf. ${data.site.ordre||'N/A'} · ${data.site.ref||'—'}</span>
+</div>
+
+</div><!-- /doc -->
+</body>
+</html>`;
+}
+
+// ==================== SAVE / LOAD ====================
+function saveData() {
+  const data = collectData();
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ESSOR_${(data.site.bailleur||'site').replace(/\s+/g,'_')}_${data.site.date||'date'}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Données sauvegardées ✓');
+}
+
+// ==================== TOAST ====================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Close modal on overlay click
+document.getElementById('camModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ==================== MODE OPERATOIRE ====================
+const MODOP_PHASES = [
+  {
+    id: 'preparation',
+    label: '1 — Préparation',
+    title: 'Préparation avant le départ',
+    desc: 'À faire la veille ou le matin avant de partir. Elle conditionne l\'efficacité de toute l\'intervention.',
+    steps: [
+      {
+        title: 'Vérifier l\'ordre de mission',
+        tag: 'Admin', tagClass: 'tag-info',
+        content: `
+          <ol class="modop-numbered">
+            <li>Confirmer l'adresse exacte du site et le nom du bailleur social</li>
+            <li>Vérifier la date, l'heure de début et la durée prévue</li>
+            <li>Identifier le nom et le numéro du contact sur site (gardien, gestionnaire)</li>
+            <li>Appeler le contact la veille pour confirmer l'accès au local technique</li>
+          </ol>
+          <div class="modop-alert alert-tip"><strong>💡 Conseil</strong>Demander systématiquement avant d'arriver :<br>• L'adresse IP du ou des NVR/DVR (ex : 192.168.1.100)<br>• La plage du réseau vidéo (ex : 192.168.1.0/24)<br>• Les identifiants de connexion (login / mot de passe)<br>• L'accès physique au local technique (badge, clé, code)</div>`
+      },
+      {
+        title: 'Préparer le matériel',
+        tag: 'Matériel', tagClass: 'tag-warn',
+        content: `
+          <ol class="modop-numbered">
+            <li>Charger entièrement le laptop, smartphone et powerbank</li>
+            <li>Vérifier que ONVIF Device Manager est installé sur le laptop</li>
+            <li>Mettre à jour l'application sur la clé USB avec la dernière version</li>
+            <li>Préparer les ordres de mission imprimés (un par site)</li>
+            <li>Remplir la checklist matériel complète</li>
+          </ol>`
+      },
+      {
+        title: 'Consulter l\'historique du site',
+        tag: 'Technique', tagClass: 'tag-warn',
+        content: `
+          <ol class="modop-numbered">
+            <li>Regarder les rapports des interventions précédentes sur ce site</li>
+            <li>Identifier les anomalies connues ou récurrentes</li>
+            <li>Vérifier si des pièces commandées sont à poser</li>
+            <li>Prévoir le matériel spécifique si anomalie connue</li>
+          </ol>
+          <div class="modop-alert alert-tip"><strong>💡 Conseil</strong>Si c'est une première intervention, demander le plan d'implantation des caméras au bailleur. Cela évite de chercher chaque caméra physiquement sur place.</div>`
+      }
+    ]
+  },
+  {
+    id: 'arrivee',
+    label: '2 — Arrivée',
+    title: 'Arrivée sur site',
+    desc: 'Prise de contact, sécurisation de l\'intervention et reconnaissance des lieux.',
+    steps: [
+      {
+        title: 'Prise de contact',
+        tag: 'Admin', tagClass: 'tag-info',
+        content: `
+          <ol class="modop-numbered">
+            <li>Se présenter au gardien ou gestionnaire avec le bon de commande et sa carte de visite</li>
+            <li>Faire signer la fiche de présence si le bailleur l'exige</li>
+            <li>Ouvrir l'application et remplir la section <strong>Informations du site</strong> : bailleur, adresse, technicien, heure de début, ordre de mission</li>
+          </ol>
+          <div class="modop-alert alert-danger"><strong>⚠ Important</strong>Ne jamais commencer à intervenir sans avoir été accueilli par un représentant du bailleur. En cas de problème constaté ultérieurement, votre responsabilité serait engagée.</div>`
+      },
+      {
+        title: 'Reconnaissance du local technique',
+        tag: 'Terrain', tagClass: 'tag-warn',
+        content: `
+          <ol class="modop-numbered">
+            <li>Se faire accompagner jusqu'au local technique (baie de brassage, local vidéosurveillance)</li>
+            <li>Observer et noter l'état général du local (propreté, humidité, ventilation, câblage)</li>
+            <li>Identifier le ou les NVR/DVR présents (nombre, marque visible sur le boîtier)</li>
+            <li>Repérer l'alimentation électrique et les onduleurs (UPS)</li>
+            <li>Prendre des photos du rack et des équipements AVANT toute intervention</li>
+          </ol>
+          <div class="modop-alert alert-tip"><strong>💡 Photos à prendre à l'arrivée</strong>• Vue générale du rack ou du local<br>• Façade du NVR/DVR (marque, modèle, voyants)<br>• État du câblage</div>`
+      }
+    ]
+  },
+  {
+    id: 'reseau',
+    label: '3 — Réseau',
+    title: 'Connexion au réseau vidéo',
+    desc: 'Étape souvent complexe pour un débutant. Suivre les méthodes dans l\'ordre selon la situation.',
+    steps: [
+      {
+        title: 'Se connecter physiquement au réseau',
+        tag: 'Réseau', tagClass: 'tag-info',
+        content: `
+          <ol class="modop-numbered">
+            <li>Brancher le câble RJ45 de votre laptop sur un port libre du switch vidéo (dans le rack)</li>
+            <li>Si aucun port libre : utiliser un mini-switch portable pour dupliquer un port sans déconnecter un équipement</li>
+            <li>Vérifier que le voyant du port s'allume sur le switch (vert = connecté)</li>
+          </ol>
+          <div class="modop-alert alert-warn"><strong>⚠ Attention</strong>Il faut être sur le MÊME réseau physique que le NVR/DVR. Se connecter uniquement au Wi-Fi du bâtiment ne suffit pas — le réseau vidéo est souvent isolé sur un switch ou VLAN séparé.</div>`
+      },
+      {
+        title: 'Méthode A — L\'IP est connue (cas idéal)',
+        tag: 'Réseau', tagClass: 'tag-ok',
+        content: `
+          <p class="modop-text">Vous avez récupéré l'IP avant l'intervention (voir Phase 1). Passer directement à la Phase 4 — Diagnostic NVR.</p>
+          <div class="modop-alert alert-ok"><strong>✓ Bonne pratique</strong>Toujours demander l'IP du NVR avant d'arriver sur site — cela économise 15 à 30 minutes de recherche.</div>`
+      },
+      {
+        title: 'Méthode B — Lire l\'IP sur l\'écran local du NVR/DVR',
+        tag: 'Réseau', tagClass: 'tag-info',
+        content: `
+          <p class="modop-text">Si un écran, une souris et un clavier sont branchés sur le NVR/DVR :</p>
+          <ol class="modop-numbered">
+            <li>Faire un clic droit sur l'écran principal <strong>ou</strong> appuyer sur le bouton Menu de la télécommande</li>
+            <li>Aller dans : <strong>Menu principal → Réseau → Configuration TCP/IP</strong> (ou Paramètres réseau)</li>
+            <li>L'adresse IP locale est affichée (ex : 192.168.1.100)</li>
+            <li>Noter aussi le masque de sous-réseau (ex : 255.255.255.0)</li>
+          </ol>
+          <div class="modop-alert alert-tip"><strong>💡 Conseil par marque</strong>• <strong>Hikvision / Dahua</strong> : l'IP est souvent visible en bas à droite de l'écran d'accueil<br>• <strong>Comelit</strong> : Menu → Configuration → Réseau<br>• <strong>Sony / Bosch</strong> : Menu → Système → Informations réseau</div>`
+      },
+      {
+        title: 'Méthode C — Scanner le réseau depuis le laptop (Windows)',
+        tag: 'Réseau', tagClass: 'tag-warn',
+        content: `
+          <p class="modop-text">Si vous n'avez pas accès à l'écran du NVR. Ouvrir l'invite de commandes (CMD) : touche Windows + R → taper <strong>cmd</strong> → Entrée.</p>
+          <div class="modop-subhead">Étape 1 — Trouver l'IP de votre laptop</div>
+          <div class="modop-code">ipconfig
+
+Chercher la section "Ethernet" :
+  Adresse IPv4 . . . . : 192.168.1.45   ← votre IP
+  Masque de sous-réseau : 255.255.255.0
+  Passerelle par défaut : 192.168.1.1   ← IP du routeur</div>
+          <div class="modop-subhead">Étape 2 — Lister tous les équipements connectés</div>
+          <div class="modop-code">arp -a
+
+Résultat exemple :
+  192.168.1.1    00-11-22-33-44-55  ← routeur/box
+  192.168.1.100  00-40-8C-AA-BB-CC  ← NVR potentiel
+  192.168.1.101  00-02-D1-DD-EE-FF  ← autre équipement</div>
+          <div class="modop-subhead">Étape 3 — Identifier le NVR parmi les IP</div>
+          <p class="modop-text">Pour chaque IP inconnue, ouvrir le navigateur et taper :</p>
+          <div class="modop-code">http://192.168.1.100
+→ Si page de connexion NVR : c'est votre équipement ✓
+→ Sinon essayer : http://192.168.1.100:8080</div>
+          <div class="modop-alert alert-tip"><strong>💡 Identifier la marque via l'adresse MAC</strong>Les 6 premiers caractères de l'adresse MAC identifient le fabricant :<br>• 00:40:8C → Hikvision &nbsp;• 00:02:D1 → Comelit &nbsp;• B8:27:EB → Bosch<br>Coller l'adresse MAC sur <strong>maclookup.app</strong> pour identifier n'importe quelle marque.</div>`
+      },
+      {
+        title: 'Méthode D — Scanner avec nmap (avancé)',
+        tag: 'Avancé', tagClass: 'tag-warn',
+        content: `
+          <p class="modop-text">Si arp -a ne suffit pas. Nmap doit être installé au préalable (Windows : nmap.org, Mac : <code>brew install nmap</code>)</p>
+          <div class="modop-code"># Trouver tous les équipements vidéo sur le réseau
+nmap -p 80,443,554,8000,8080,37777 --open 192.168.1.0/24
+
+# Remplacer 192.168.1 par votre sous-réseau
+
+Port 554 ouvert  → flux RTSP actif → caméra ou NVR ✓
+Port 8000 ouvert → SDK Hikvision
+Port 37777 ouvert → SDK Dahua</div>`
+      },
+      {
+        title: 'Méthode E — ONVIF Device Manager (le plus simple)',
+        tag: 'Recommandé', tagClass: 'tag-ok',
+        content: `
+          <p class="modop-text">ONVIF Device Manager détecte automatiquement tous les équipements compatibles ONVIF sur le réseau.</p>
+          <ol class="modop-numbered">
+            <li>Ouvrir <strong>ONVIF Device Manager</strong> sur votre laptop (Windows)</li>
+            <li>Cliquer sur le bouton <strong>Refresh</strong> en bas à gauche</li>
+            <li>Attendre 20 à 30 secondes — les équipements apparaissent automatiquement</li>
+            <li>Cliquer sur un équipement pour voir son IP, sa marque et son firmware</li>
+          </ol>
+          <div class="modop-alert alert-warn"><strong>⚠ Limite</strong>ONVIF Device Manager ne détecte que les équipements compatibles ONVIF. Les vieux DVR analogiques ou équipements bas de gamme peuvent ne pas apparaître. Utiliser dans ce cas la méthode B ou C.</div>`
+      },
+      {
+        title: 'Réseau isolé ou sécurisé — que faire ?',
+        tag: 'Important', tagClass: 'tag-danger',
+        content: `
+          <p class="modop-text">Certains bailleurs ont un réseau vidéo isolé (VLAN dédié, firewall). Symptôme : vous êtes branché en ethernet mais <strong>arp -a ne trouve rien</strong>.</p>
+          <div class="modop-subhead">Diagnostic : vérifier si vous êtes dans la même plage IP</div>
+          <div class="modop-code">Votre laptop : 192.168.1.45
+NVR           : 10.0.0.100
+→ Pas la même plage → vous ne vous voyez pas</div>
+          <div class="modop-subhead">Solution — Changer l'IP de votre laptop (Windows)</div>
+          <ol class="modop-numbered">
+            <li>Panneau de configuration → Centre Réseau et partage → Connexions réseau</li>
+            <li>Clic droit sur Ethernet → Propriétés</li>
+            <li>Double-clic sur <strong>Protocole Internet version 4 (TCP/IPv4)</strong></li>
+            <li>Cocher <strong>Utiliser l'adresse IP suivante</strong></li>
+            <li>Entrer une IP dans la même plage que le NVR mais différente :</li>
+          </ol>
+          <div class="modop-code">Exemple : NVR en 10.0.0.100
+  → IP laptop  : 10.0.0.50
+  → Masque     : 255.255.255.0
+  → Passerelle : laisser vide (ou 10.0.0.1)</div>
+          <ol class="modop-numbered" start="6">
+            <li>Cliquer OK → faire <strong>ping 10.0.0.100</strong> pour vérifier</li>
+            <li><strong>IMPORTANT</strong> : Remettre en DHCP automatique après l'intervention</li>
+          </ol>
+          <div class="modop-alert alert-danger"><strong>⚠ Interdit</strong>Ne jamais tenter de contourner un firewall sans autorisation écrite du bailleur. Même en tant que technicien mandaté, c'est une infraction pénale (art. 323-1 Code Pénal). Si le réseau est bloqué : contacter le prestataire réseau du bailleur ou intervenir directement via l'écran local du NVR.</div>`
+      }
+    ]
+  },
+  {
+    id: 'nvr',
+    label: '4 — NVR/DVR',
+    title: 'Diagnostic NVR / DVR',
+    desc: 'Connexion à l\'interface, relevé des informations et vérification de l\'enregistrement.',
+    steps: [
+      {
+        title: 'Se connecter à l\'interface du NVR',
+        tag: 'Réseau', tagClass: 'tag-info',
+        content: `
+          <div class="modop-subhead">Via navigateur web</div>
+          <p class="modop-text">Ouvrir Chrome ou Edge → taper l'IP du NVR : <strong>http://192.168.1.100</strong></p>
+          <table class="modop-table">
+            <thead><tr><th>Marque</th><th>Login</th><th>Mot de passe par défaut</th><th>Remarque</th></tr></thead>
+            <tbody>
+              <tr><td>Sony</td><td>admin</td><td>admin</td><td>Parfois changé à la livraison</td></tr>
+              <tr><td>Comelit</td><td>admin</td><td>admin</td><td>Souvent inchangé</td></tr>
+              <tr><td>Bosch</td><td>admin</td><td>Vide ou sur étiquette</td><td>Chercher étiquette sous le boîtier</td></tr>
+              <tr><td>Hikvision</td><td>admin</td><td>12345 ou étiquette</td><td>Modèles récents : MDP personnalisé</td></tr>
+              <tr><td>Dahua</td><td>admin</td><td>admin</td><td>Certains : MDP sur étiquette</td></tr>
+              <tr><td>Axis</td><td>root</td><td>pass ou étiquette</td><td>Toujours changé à la livraison</td></tr>
+            </tbody>
+          </table>
+          <div class="modop-alert alert-tip"><strong>💡 Identifiants inconnus</strong>Chercher l'étiquette autocollante sous ou derrière le NVR — le mot de passe y est souvent imprimé. Sinon demander au bailleur ou au gestionnaire du site.</div>
+          <div class="modop-subhead">Via logiciel constructeur (si pas d'interface web)</div>
+          <table class="modop-table">
+            <thead><tr><th>Marque</th><th>Logiciel</th></tr></thead>
+            <tbody>
+              <tr><td>Hikvision</td><td>iVMS-4200 (hikvision.com/fr)</td></tr>
+              <tr><td>Dahua</td><td>SmartPSS (dahuasecurity.com)</td></tr>
+              <tr><td>Comelit</td><td>Comelit VMS (comelitgroup.com)</td></tr>
+              <tr><td>Bosch</td><td>Bosch Video Management (boschsecurity.com)</td></tr>
+              <tr><td>Sony</td><td>RealShot Manager (pro.sony.com)</td></tr>
+            </tbody>
+          </table>
+          <div class="modop-subhead">Via écran local (accès direct — dernier recours)</div>
+          <ol class="modop-numbered">
+            <li>Vérifier qu'un écran est branché sur la sortie HDMI ou VGA du NVR</li>
+            <li>Brancher une souris USB si nécessaire</li>
+            <li>Clic droit sur l'interface principale → Menu principal</li>
+            <li>Naviguer avec la souris ou les touches directionnelles du boîtier</li>
+          </ol>`
+      },
+      {
+        title: 'Relever les informations du NVR — à saisir dans l&#x27;application',
+        tag: 'l&#x27;application', tagClass: 'tag-info',
+        content: `
+          <div class="modop-subhead">Informations générales</div>
+          <ul class="modop-list">
+            <li>Marque et modèle exact → façade ou Menu → Système → À propos</li>
+            <li>Version du firmware → Menu → Maintenance → Infos système</li>
+            <li>Adresse IP, masque, passerelle → Menu → Réseau → TCP/IP</li>
+            <li>Nombre de voies actives sur le total disponible</li>
+          </ul>
+          <div class="modop-subhead">État du stockage</div>
+          <ul class="modop-list">
+            <li>État des disques : Sain / Dégradé / En erreur → Menu → Stockage → Gestion HDD</li>
+            <li>Capacité totale et espace utilisé (Go/To)</li>
+            <li>Durée de rétention en jours</li>
+          </ul>
+          <div class="modop-alert alert-tip"><strong>💡 Calculer la rétention</strong>Si non affichée directement :<br>Rétention (jours) = Capacité HDD (Go) ÷ (Débit/caméra en Go/jour × Nb caméras)<br>Exemple : 2000 Go ÷ (3 Go/j × 8 cams) ≈ 83 jours</div>
+          <div class="modop-subhead">Synchronisation de l'heure</div>
+          <ul class="modop-list">
+            <li>Vérifier que la date et l'heure du NVR sont correctes (comparer avec votre téléphone)</li>
+            <li>Si fausse : Menu → Système → Date et heure → Corriger ou activer NTP</li>
+          </ul>
+          <div class="modop-alert alert-danger"><strong>⚠ Important</strong>Une heure incorrecte rend les enregistrements inutilisables juridiquement. À corriger systématiquement même si tout le reste fonctionne.</div>`
+      },
+      {
+        title: 'Vérifier l\'enregistrement',
+        tag: 'Critique', tagClass: 'tag-danger',
+        content: `
+          <ol class="modop-numbered">
+            <li>Aller dans le menu <strong>Lecture / Playback</strong> du NVR</li>
+            <li>Sélectionner une caméra et revenir 24h en arrière</li>
+            <li>Vérifier qu'il y a un enregistrement continu (pas de trous dans la timeline)</li>
+            <li>Lire quelques secondes de vidéo pour confirmer que l'image est correcte</li>
+            <li>Vérifier le planning : Menu → Enregistrement → Planning → 24h/24 actif</li>
+          </ol>
+          <div class="modop-alert alert-danger"><strong>⚠ Anomalie critique</strong>Si les disques sont pleins ou en erreur, l'enregistrement peut être arrêté depuis plusieurs jours sans que personne ne s'en rende compte. Le système peut sembler fonctionnel en façade mais ne rien enregistrer. Signaler immédiatement et par écrit au bailleur.</div>`
+      }
+    ]
+  },
+  {
+    id: 'cameras',
+    label: '5 — Caméras',
+    title: 'Diagnostic caméras',
+    desc: 'Vérification individuelle de chaque caméra. Remplir l&#x27;application au fur et à mesure.',
+    steps: [
+      {
+        title: 'Premier tour depuis le NVR (vue d\'ensemble rapide)',
+        tag: 'Technique', tagClass: 'tag-info',
+        content: `
+          <ol class="modop-numbered">
+            <li>Afficher la vue multicanaux sur le NVR (grille 4×4, 3×3...)</li>
+            <li>Pour chaque canal, noter dans l'application :</li>
+          </ol>
+          <ul class="modop-list">
+            <li><strong>Image présente et normale</strong> → État OK</li>
+            <li><strong>Image noire, neige, gel ou "Perte signal"</strong> → État KO</li>
+            <li><strong>Image présente mais dégradée</strong> (floue, heure fausse...) → État Dégradé</li>
+          </ul>
+          <div class="modop-alert alert-tip"><strong>💡 Conseil</strong>Commencer par corriger les caméras KO en priorité. Si vous manquez de temps, les caméras OK peuvent être vérifiées rapidement en dernier.</div>`
+      },
+      {
+        title: 'Inspection physique caméra par caméra',
+        tag: 'Terrain', tagClass: 'tag-warn',
+        content: `
+          <table class="modop-table">
+            <thead><tr><th>Point de contrôle</th><th>Ce qu'il faut vérifier</th><th>Outil</th></tr></thead>
+            <tbody>
+              <tr><td>Image / Signal</td><td>Image présente, nette, sans artefact</td><td>NVR ou testeur CCTV</td></tr>
+              <tr><td>Enregistrement</td><td>Icône REC visible, flux enregistré</td><td>NVR</td></tr>
+              <tr><td>Vision nocturne IR</td><td>LEDs IR fonctionnelles</td><td>Smartphone dans le noir</td></tr>
+              <tr><td>Orientation / Champ</td><td>Angle de vue couvre bien la zone</td><td>Visuel</td></tr>
+              <tr><td>Qualité optique</td><td>Objectif propre, pas de condensation</td><td>Microfibre</td></tr>
+              <tr><td>Câblage / Connectique</td><td>Pas de câble arraché ou oxydé</td><td>Visuel + multimètre</td></tr>
+              <tr><td>Fixation mécanique</td><td>Caméra stable, pas de jeu, visserie OK</td><td>Visuel + main</td></tr>
+              <tr><td>Horodatage</td><td>Date et heure correctes sur le flux</td><td>NVR ou testeur</td></tr>
+            </tbody>
+          </table>
+          <div class="modop-alert alert-tip"><strong>💡 Vérifier les LEDs IR sans matériel</strong>Pointer votre smartphone vers la caméra dans le noir. Les LEDs IR apparaissent en violet/blanc sur votre écran si elles fonctionnent.</div>`
+      },
+      {
+        title: 'Saisie dans l&#x27;application',
+        tag: 'l&#x27;application', tagClass: 'tag-ok',
+        content: `
+          <ol class="modop-numbered">
+            <li>Renseigner pour chaque caméra : nom, emplacement, type, marque</li>
+            <li>Cliquer sur <strong>+ Détail</strong> pour ouvrir la fiche de contrôle</li>
+            <li>Cocher chaque point de contrôle (clic = OK → Dégradé → KO)</li>
+            <li>Définir l'état global : OK / Dégradé / KO avec les boutons colorés</li>
+            <li>Saisir les anomalies constatées et les actions réalisées sur place</li>
+            <li>Prendre une photo de chaque caméra en anomalie</li>
+          </ol>
+          <div class="modop-alert alert-ok"><strong>✓ Bonne pratique</strong>Remplir l'application au fur et à mesure, caméra par caméra. Ne pas tout laisser pour la fin — les détails s'oublient rapidement.</div>`
+      }
+    ]
+  },
+  {
+    id: 'correctif',
+    label: '6 — Correctif',
+    title: 'Interventions correctives sur place',
+    desc: 'Pour les caméras et équipements identifiés comme KO ou dégradés.',
+    steps: [
+      {
+        title: 'Actions correctives immédiates',
+        tag: 'Technique', tagClass: 'tag-warn',
+        content: `
+          <table class="modop-table">
+            <thead><tr><th>Problème constaté</th><th>Action corrective</th></tr></thead>
+            <tbody>
+              <tr><td>Objectif sale ou voilé</td><td>Nettoyer avec microfibre + spray optique. Ne jamais utiliser de tissu rugueux.</td></tr>
+              <tr><td>Caméra désorientée</td><td>Desserrer le joint de rotation, réorienter, retendre. Vérifier l'angle depuis le NVR.</td></tr>
+              <tr><td>Caméra IP ne répond plus (image noire)</td><td>Reboot PoE : débrancher le câble 10 secondes puis rebrancher. Attendre 2 min.</td></tr>
+              <tr><td>Connecteur BNC arraché ou oxydé</td><td>Couper le connecteur, dénuder, sertir un nouveau BNC avec la pince à sertir.</td></tr>
+              <tr><td>Connecteur RJ45 défectueux</td><td>Couper, remettre fils en ordre T568B, sertir un nouveau RJ45.</td></tr>
+              <tr><td>Fixation instable</td><td>Revisser les vis, remplacer les chevilles si le mur est dégradé.</td></tr>
+              <tr><td>Date/heure incorrecte</td><td>Menu Système → Date et heure → Corriger ou activer NTP.</td></tr>
+              <tr><td>Disque dur en erreur</td><td>Signaler au bailleur — ne pas remplacer sans accord. Vérifier le disque de secours.</td></tr>
+            </tbody>
+          </table>
+          <div class="modop-subhead">Ordre de câblage RJ45 — Standard T568B</div>
+          <div class="modop-code">Position  Couleur          Signal
+1         Blanc/Orange      TX+
+2         Orange            TX-
+3         Blanc/Vert        RX+
+4         Bleu              Non utilisé
+5         Blanc/Bleu        Non utilisé
+6         Vert              RX-
+7         Blanc/Marron      Non utilisé
+8         Marron            Non utilisé</div>`
+      },
+      {
+        title: 'Anomalies non réalisables sur place',
+        tag: 'Escalade', tagClass: 'tag-danger',
+        content: `
+          <ol class="modop-numbered">
+            <li>Lister dans l'application (champ <strong>Actions à planifier</strong>) toutes les anomalies nécessitant un retour</li>
+            <li>Identifier les pièces à commander (caméra HS, câble à tirer, alimentation, HDD)</li>
+            <li>Évaluer la criticité :</li>
+          </ol>
+          <ul class="modop-list">
+            <li><strong>Zone non couverte</strong> (entrée, parking, couloir) = URGENCE — signaler immédiatement</li>
+            <li><strong>Image dégradée mais présente</strong> = MOYEN — planifier sous 15 jours</li>
+            <li><strong>Défaut mineur</strong> (orientation légèrement décalée) = FAIBLE — prochain passage</li>
+          </ul>
+          <div class="modop-alert alert-danger"><strong>⚠ Important</strong>Si une zone de sécurité critique n'est plus couverte, informer le bailleur AVANT de partir et lui remettre une attestation écrite mentionnant la zone non couverte et la date. Cela vous protège juridiquement en cas d'incident.</div>`
+      }
+    ]
+  },
+  {
+    id: 'cloture',
+    label: '7 — Clôture',
+    title: 'Clôture de l\'intervention',
+    desc: 'Finalisation du rapport, remise en état du site et départ.',
+    steps: [
+      {
+        title: 'Finaliser le rapport l&#x27;application',
+        tag: 'Rapport', tagClass: 'tag-info',
+        content: `
+          <ol class="modop-numbered">
+            <li>Vérifier que toutes les caméras sont renseignées dans l'application</li>
+            <li>Remplir la section <strong>Conclusion de l'intervention</strong></li>
+            <li>Remplir la section <strong>Actions à planifier</strong> (retour intervention)</li>
+            <li>Renseigner l'heure de fin d'intervention</li>
+            <li>Renseigner le visa technicien et le visa client</li>
+            <li>Cliquer sur <strong>Générer le rapport PDF</strong></li>
+            <li>Dans le navigateur : bouton Imprimer → Sauvegarder en PDF</li>
+          </ol>`
+      },
+      {
+        title: 'Remise en état du local technique',
+        tag: 'Terrain', tagClass: 'tag-warn',
+        content: `
+          <ol class="modop-numbered">
+            <li>Ranger tous les outils et le matériel dans votre sac</li>
+            <li>Vérifier que tous les équipements sont bien rebranchés et allumés (voyants NVR au vert)</li>
+            <li>Refermer les coffrets, baies, goulottes ouvertes</li>
+            <li>Remettre l'IP de votre laptop en DHCP automatique si vous l'avez modifiée</li>
+            <li>Débrancher votre câble RJ45 du switch</li>
+          </ol>
+          <div class="modop-alert alert-warn"><strong>⚠ Attention</strong>Ne jamais partir sans vérifier que tous les équipements sont alimentés et fonctionnels. Un câble malencontreusement débranché peut couper l'enregistrement de tout un site.</div>`
+      },
+      {
+        title: 'Remise du rapport et signature',
+        tag: 'Admin', tagClass: 'tag-info',
+        content: `
+          <ol class="modop-numbered">
+            <li>Présenter le rapport PDF au contact sur site</li>
+            <li>Expliquer oralement les principales anomalies et actions réalisées</li>
+            <li>Mentionner clairement les caméras encore en anomalie et les zones non couvertes</li>
+            <li>Faire signer la fiche d'intervention par le représentant du bailleur</li>
+            <li>Laisser une copie papier ou envoyer le PDF par email depuis le site</li>
+          </ol>
+          <div class="modop-alert alert-ok"><strong>✓ Bonne pratique</strong>Un rapport signé sur place est votre meilleure protection en cas de litige ultérieur. Ne jamais partir sans cette signature.</div>`
+      },
+      {
+        title: 'Clôture administrative (après le site)',
+        tag: 'Admin', tagClass: 'tag-info',
+        content: `
+          <ol class="modop-numbered">
+            <li>Sauvegarder le rapport PDF dans le dossier client</li>
+            <li>Transmettre le rapport à votre responsable et au bailleur par email</li>
+            <li>Créer le bon de retour intervention si anomalies non résolues</li>
+            <li>Commander les pièces nécessaires (caméras, câbles, disques durs)</li>
+            <li>Mettre à jour l'historique du site pour préparer la prochaine intervention</li>
+          </ol>`
+      }
+    ]
+  },
+  {
+    id: 'annexe',
+    label: '📎 Référence rapide',
+    title: 'Référence rapide terrain',
+    desc: 'Ports réseau, commandes CMD et tableau de dépannage rapide.',
+    steps: [
+      {
+        title: 'Ports réseau à connaître',
+        tag: 'Réseau', tagClass: 'tag-info',
+        content: `
+          <table class="modop-table">
+            <thead><tr><th>Port</th><th>Service</th><th>Utilisation</th></tr></thead>
+            <tbody>
+              <tr><td>80</td><td>HTTP</td><td>Interface web du NVR (accès navigateur)</td></tr>
+              <tr><td>443</td><td>HTTPS</td><td>Interface web sécurisée</td></tr>
+              <tr><td>554</td><td>RTSP</td><td>Flux vidéo en direct — port ouvert = caméra ou NVR</td></tr>
+              <tr><td>8000</td><td>SDK</td><td>Connexion logiciel Hikvision iVMS-4200</td></tr>
+              <tr><td>8080</td><td>HTTP alt.</td><td>Interface web alternative si port 80 bloqué</td></tr>
+              <tr><td>37777</td><td>SDK</td><td>Connexion logiciel Dahua SmartPSS</td></tr>
+              <tr><td>3702</td><td>ONVIF</td><td>Détection automatique appareils ONVIF</td></tr>
+            </tbody>
+          </table>`
+      },
+      {
+        title: 'Commandes CMD essentielles (Windows)',
+        tag: 'Réseau', tagClass: 'tag-info',
+        content: `
+          <div class="modop-code">ipconfig              → Voir l'IP de votre laptop et le masque
+arp -a                → Lister tous les équipements sur le réseau
+ping 192.168.1.100    → Tester si un équipement répond
+nmap -p 554 --open 192.168.1.0/24  → Trouver caméras/NVR</div>`
+      },
+      {
+        title: 'Que faire si...',
+        tag: 'Dépannage', tagClass: 'tag-warn',
+        content: `
+          <table class="modop-table">
+            <thead><tr><th>Situation</th><th>Solution</th></tr></thead>
+            <tbody>
+              <tr><td>Je ne trouve pas l'IP du NVR</td><td>Méthode B (écran local) → C (arp -a) → E (ONVIF DM)</td></tr>
+              <tr><td>Le navigateur n'affiche pas l'interface</td><td>Essayer port 8080 : http://IP:8080 — ou logiciel constructeur</td></tr>
+              <tr><td>Identifiants refusés</td><td>Chercher étiquette sous le NVR — sinon contacter le bailleur</td></tr>
+              <tr><td>arp -a ne trouve rien</td><td>Vérifier le voyant du câble — changer l'IP du laptop si réseau isolé</td></tr>
+              <tr><td>Disque dur NVR en erreur</td><td>Signaler au bailleur, ne pas remplacer sans accord</td></tr>
+              <tr><td>Caméra KO, pas de matériel pour réparer</td><td>Documenter dans l'application, informer bailleur par écrit avant de partir</td></tr>
+              <tr><td>NVR inaccessible via réseau</td><td>Accéder directement via écran + clavier branché sur le NVR</td></tr>
+            </tbody>
+          </table>`
+      }
+    ]
+  }
+];
+
+let modopActivePhase = 0;
+let modopOpenSteps = {};
+
+function toggleModop() {
+  const overlay = document.getElementById('modopOverlay');
+  overlay.classList.toggle('open');
+  if (overlay.classList.contains('open') && !document.getElementById('modopPhases').innerHTML) {
+    renderModop();
+  }
+}
+
+function renderModop() {
+  // Render tabs
+  const tabs = document.getElementById('modopTabs');
+  tabs.innerHTML = MODOP_PHASES.map((p, i) =>
+    `<button class="modop-tab ${i === modopActivePhase ? 'active' : ''}" onclick="setModopPhase(${i})">${p.label}</button>`
+  ).join('');
+
+  // Render phases
+  const container = document.getElementById('modopPhases');
+  container.innerHTML = MODOP_PHASES.map((phase, pi) => `
+    <div class="modop-phase ${pi === modopActivePhase ? 'active' : ''}" id="mphase-${pi}">
+      <div class="modop-phase-header">
+        <div class="modop-phase-num">Phase ${pi + 1} / ${MODOP_PHASES.length}</div>
+        <div class="modop-phase-title">${phase.title}</div>
+        <div class="modop-phase-desc">${phase.desc}</div>
+      </div>
+      <div>
+        ${phase.steps.map((step, si) => {
+          const key = `${pi}-${si}`;
+          const isOpen = !!modopOpenSteps[key];
+          return `
+          <div class="modop-step ${isOpen ? 'open' : ''}" id="mstep-${key}">
+            <div class="modop-step-head" onclick="toggleModopStep('${key}')">
+              <span class="modop-step-num">${String(si + 1).padStart(2, '0')}</span>
+              <span class="modop-step-title">${step.title}</span>
+              <span class="modop-step-tag ${step.tagClass}">${step.tag}</span>
+              <span class="modop-step-arrow">▼</span>
+            </div>
+            <div class="modop-step-body">${step.content}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="modop-phase-nav">
+        ${pi > 0 ? `<button class="btn btn-secondary btn-sm" onclick="setModopPhase(${pi - 1})">← ${MODOP_PHASES[pi - 1].label}</button>` : '<span></span>'}
+        ${pi < MODOP_PHASES.length - 1 ? `<button class="btn btn-primary btn-sm" onclick="setModopPhase(${pi + 1})">${MODOP_PHASES[pi + 1].label} →</button>` : '<span style="font-size:12px;color:var(--green);font-weight:600;">✓ Mode op complet</span>'}
+      </div>
+    </div>
+  `).join('');
+}
+
+function setModopPhase(i) {
+  modopActivePhase = i;
+  renderModop();
+  document.getElementById('modopOverlay').scrollTo(0, 0);
+}
+
+function toggleModopStep(key) {
+  modopOpenSteps[key] = !modopOpenSteps[key];
+  const el = document.getElementById('mstep-' + key);
+  if (el) el.classList.toggle('open', !!modopOpenSteps[key]);
+}
+</script>
+</body>
+</html>
