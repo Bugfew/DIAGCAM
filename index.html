@@ -2782,6 +2782,17 @@ body{font-family:'Inter',sans-serif;font-size:10.5pt;color:var(--text);backgroun
     ${data.site.obsPrealables?`<div class="obs-block"><label>Observations préalables</label><p>${data.site.obsPrealables}</p></div>`:''}
   </div>
 
+  <!-- PHOTOS DU SITE -->
+  ${((data.photos||{})['site-general']||[]).length?`
+  <div class="sec avoid-break">
+    <div class="sec-title">Photos du site</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      ${((data.photos||{})['site-general']||[]).map(p=>`
+        <img src="${p.src}" style="width:160px;height:120px;object-fit:cover;border-radius:5px;border:1px solid #e5e7eb;display:block;">`).join('')}
+    </div>
+  </div>
+  `:''}
+
   <!-- NVR/DVR -->
   ${data.nvrs.length?`
   <div class="sec avoid-break">
@@ -2811,25 +2822,14 @@ body{font-family:'Inter',sans-serif;font-size:10.5pt;color:var(--text);backgroun
           ${(()=>{
             const photos = (data.photos||{})['nvr-'+nvr.id]||[];
             if(!photos.length) return '';
-            return `<tr><td colspan="9" style="padding:10px 12px;background:#fafafa;border-top:1px solid #e5e7eb;">
-              <div style="font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;color:#666;font-weight:600;margin-bottom:8px;">📷 Photos NVR/DVR #${i+1}</div>
-              ${photos.map(p=>`<div style="margin-bottom:8px;"><img src="${p.src}" style="width:100%;max-width:500px;border-radius:5px;border:1px solid #e5e7eb;display:block;"></div>`).join('')}
+            return `<tr><td colspan="9" style="padding:8px 12px;background:#fafafa;border-top:1px solid #e5e7eb;">
+              <div style="font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;color:#666;font-weight:600;margin-bottom:6px;">📷 Photos NVR/DVR #${i+1}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;">${photos.map(p=>`<img src="${p.src}" style="width:160px;height:120px;object-fit:cover;border-radius:4px;border:1px solid #e5e7eb;display:block;">`).join('')}</div>
             </td></tr>`;
           })()}
         `).join('')}
       </tbody>
     </table>
-  </div>
-  `:''}
-
-  <!-- PHOTOS DU SITE -->
-  ${((data.photos||{})['site-general']||[]).length?`
-  <div class="sec avoid-break">
-    <div class="sec-title">Photos du site</div>
-    ${((data.photos||{})['site-general']||[]).map(p=>`
-      <div style="margin-bottom:10px;">
-        <img src="${p.src}" style="width:100%;max-width:600px;border-radius:6px;border:1px solid #e5e7eb;display:block;">
-      </div>`).join('')}
   </div>
   `:''}
 
