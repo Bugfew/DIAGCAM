@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Diagnostic ESSOR — Vidéosurveillance</title>
+<title>ESSOR — Gestion Vidéosurveillance</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
@@ -596,6 +596,8 @@
   .hdr-btn-carte { background: rgba(0,212,255,0.12); border-color: rgba(0,212,255,0.3); color: var(--accent); }
   .hdr-btn-hist  { background: rgba(0,230,118,0.12); border-color: rgba(0,230,118,0.3); color: #00e676; }
   .hdr-btn-modop { background: rgba(255,170,0,0.12); border-color: rgba(255,170,0,0.3); color: #ffaa00; }
+  .hdr-btn-fiche  { background: rgba(0,230,118,0.12); border-color: rgba(0,230,118,0.3); color: #00e676; }
+  .hdr-btn-interv { background: rgba(255,107,53,0.12); border-color: rgba(255,107,53,0.3); color: #ff6b35; }
 
   @media (max-width: 600px) {
     /* Forms */
@@ -662,6 +664,80 @@
   @media (max-width: 400px) {
     .hdr-btn { font-size: 11px; padding: 7px 6px; }
   }
+
+
+  /* ===== VISITE TYPE TOGGLE ===== */
+  .visite-type-btn {
+    padding: 10px 18px; border-radius: 7px; font-size: 13px; font-weight: 600;
+    cursor: pointer; border: 1px solid var(--border); background: var(--surface2);
+    color: var(--text2); font-family: var(--sans); transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .visite-type-btn:hover { border-color: var(--text2); color: var(--text); }
+  .visite-type-btn.active-preventive { background: rgba(0,230,118,0.12); border-color: rgba(0,230,118,0.4); color: var(--green); }
+  .visite-type-btn.active-corrective { background: rgba(255,107,53,0.12); border-color: rgba(255,107,53,0.4); color: #ff6b35; }
+
+  /* ===== CLEF ROW ===== */
+  .clef-row {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1.5fr 0.8fr auto;
+    gap: 8px;
+    align-items: end;
+    padding: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    margin-bottom: 8px;
+  }
+  .clef-row .field { margin: 0; }
+
+  /* ===== MDP ROW ===== */
+  .mdp-row {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--orange);
+    border-radius: 7px;
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+
+  /* ===== PLAN BLOCK ===== */
+  .plan-block {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .plan-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .plan-cam-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .plan-cam-table th {
+    font-size: 9px; color: var(--text2); text-transform: uppercase; letter-spacing: .8px;
+    padding: 6px 10px; border-bottom: 1px solid var(--border); text-align: left; font-weight: 500;
+  }
+  .plan-cam-table td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+  .plan-cam-table tr:last-child td { border-bottom: none; }
+  .plan-cam-table input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--text); padding: 3px 4px; outline: none; font-size: 12px; font-family: var(--sans); }
+  .plan-cam-table input:focus { border-bottom-color: var(--accent); }
+
+  /* ===== TRAVAUX / MATERIEL ROWS ===== */
+  .travail-row, .mat-row {
+    display: grid; gap: 8px; align-items: end;
+    padding: 10px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 7px; margin-bottom: 8px;
+  }
+  .travail-row { grid-template-columns: 1fr 1fr 0.8fr auto; }
+  .mat-row { grid-template-columns: 1fr 0.5fr 1fr auto; }
+  .travail-row .field, .mat-row .field { margin: 0; }
+
+  /* ===== PW FIELD ===== */
+  .pw-field-wrap { position: relative; }
+  .pw-field-wrap input { padding-right: 36px !important; }
+  .pw-toggle { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text2); font-size: 14px; }
 
   /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; }
@@ -1294,6 +1370,25 @@
   @media (max-width: 700px) {
     .carte-sidebar { display: none; }
   }
+
+/* ===== PAGE 0 — SÉLECTION SITE ===== */
+.site-selector-empty { text-align:center; padding:48px 20px; color:var(--text2); }
+.site-selector-empty-icon { font-size:48px; margin-bottom:12px; }
+.site-selector-empty-text { font-size:14px; margin-bottom:20px; }
+.site-select-list { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+.site-select-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px 18px; display:flex; align-items:center; gap:16px; cursor:pointer; transition:border-color 0.15s, background 0.15s; }
+.site-select-card:hover { border-color:var(--accent); background:rgba(0,212,255,0.04); }
+.site-select-card-icon { width:44px; height:44px; border-radius:8px; background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.2); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.site-select-card-info { flex:1; min-width:0; }
+.site-select-card-name { font-size:14px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.site-select-card-addr { font-size:11px; color:var(--text2); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.site-select-card-meta { font-size:10px; color:var(--text2); font-family:var(--mono); margin-top:4px; display:flex; gap:8px; flex-wrap:wrap; }
+.site-select-card-actions { display:flex; gap:6px; flex-shrink:0; }
+.site-sel-btn { padding:6px 12px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; border:1px solid; font-family:var(--sans); transition:all 0.15s; white-space:nowrap; }
+.site-sel-btn-select { background:var(--accent); color:#000; border-color:var(--accent); }
+.site-sel-btn-select:hover { background:#00bcd4; }
+.site-sel-btn-del { background:transparent; color:var(--red); border-color:rgba(255,61,87,0.3); }
+.site-sel-btn-del:hover { background:rgba(255,61,87,0.08); }
 </style>
 </head>
 <body>
@@ -1306,11 +1401,13 @@
       </div>
       <div>
         <div class="logo-text" style="color:var(--accent);letter-spacing:3px;font-size:14px;">ESSOR</div>
-        <div class="logo-sub">Diagnostic Vidéosurveillance</div>
+        <div class="logo-sub">Vidéosurveillance Bailleur Social</div>
       </div>
     </div>
   </div>
   <div class="header-actions">
+    <button class="hdr-btn hdr-btn-fiche" onclick="goToPage(1)" id="btnFicheHdr">🏢 FICHE</button>
+    <button class="hdr-btn hdr-btn-interv" onclick="goToPage(2)" id="btnIntervHdr">📋 VISITE</button>
     <button class="hdr-btn hdr-btn-new" onclick="nouvelleIntervention()">＋ NOUVEAU</button>
     <button class="hdr-btn hdr-btn-carte" onclick="toggleCarte()">🗺</button>
     <button class="hdr-btn hdr-btn-hist" onclick="toggleHistorique()">🗂</button>
@@ -1321,97 +1418,322 @@
 
 <main>
   <!-- PAGE 1: INFOS SITE -->
-  <div class="page active" id="page1">
-    <div class="section-header">
-      <div class="section-tag">Étape 01 / 04</div>
-      <div class="section-title">Informations du site</div>
-      <div class="section-desc">Renseigner les données générales de l'intervention</div>
-    </div>
+  
+<!-- PAGE 0 : SÉLECTION DU SITE -->
+<div class="page active" id="page0">
+  <div class="section-header">
+    <div class="section-tag">Démarrage</div>
+    <div class="section-title">🏢 Sélection du site</div>
+    <div class="section-desc">Choisissez un site existant pour pré-remplir la fiche, ou créez une nouvelle fiche site</div>
+  </div>
+  <div id="siteSelectList"></div>
+  <div class="actions-row" style="justify-content:center;">
+    <button class="btn btn-primary" onclick="nouveauSiteVierge()" style="font-size:14px;padding:12px 28px;">＋ Nouveau site</button>
+  </div>
+</div>
 
-    <div class="card">
-      <div class="card-title">🏢 Bailleur & Site</div>
-      <div class="form-grid">
-        <div class="field">
-          <label>Nom du bailleur social *</label>
-          <input type="text" id="baillerNom" placeholder="Ex : Paris Habitat, Logirep...">
-        </div>
-        <div class="field">
-          <label>Adresse du site *</label>
-          <input type="text" id="siteAdresse" placeholder="12 rue des Acacias, 75014 Paris">
-        </div>
-        <div class="field">
-          <label>Référence / Num. de site</label>
-          <input type="text" id="siteRef" placeholder="Ex: S-00421">
-        </div>
-        <div class="field">
-          <label>Type de site</label>
-          <select id="siteType">
-            <option value="">-- Sélectionner --</option>
-            <option>Résidence</option>
-            <option>Immeuble collectif</option>
-            <option>Parking souterrain</option>
-            <option>Espace extérieur</option>
-            <option>Hall d'entrée</option>
-            <option>Multi-bâtiments</option>
-          </select>
-        </div>
+<!-- ============================================================ -->
+<!-- PAGE 1 : FICHE D'IDENTITÉ DU SITE                           -->
+<!-- ============================================================ -->
+<div class="page" id="page1">
+  <div class="section-header">
+    <div class="section-tag">Module 01 / 06</div>
+    <div class="section-title">🏢 Fiche d'identité du site</div>
+    <div class="section-desc">Informations permanentes du site — partagées automatiquement avec les fiches de visite</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏢 Identification</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Bailleur social *</label>
+        <input type="text" id="fi_bailleur" placeholder="Ex : Paris Habitat, Logirep...">
+      </div>
+      <div class="field">
+        <label>Adresse complète *</label>
+        <input type="text" id="fi_adresse" placeholder="12 rue des Acacias, 75014 Paris">
+      </div>
+      <div class="field">
+        <label>Référence / Num. site</label>
+        <input type="text" id="fi_ref" placeholder="Ex: S-00421">
+      </div>
+      <div class="field">
+        <label>Type de site</label>
+        <select id="fi_type">
+          <option value="">-- Sélectionner --</option>
+          <option>Résidence</option>
+          <option>Immeuble collectif</option>
+          <option>Parking souterrain</option>
+          <option>Espace extérieur</option>
+          <option>Hall d'entrée</option>
+          <option>Multi-bâtiments</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Contact (gardien / gestionnaire)</label>
+        <input type="text" id="fi_contact" placeholder="Nom & téléphone">
+      </div>
+      <div class="field">
+        <label>Nb caméras installées</label>
+        <input type="number" id="fi_nbCam" min="0" placeholder="Ex: 12">
+      </div>
+      <div class="field">
+        <label>Nb enregistreurs (NVR/DVR)</label>
+        <input type="number" id="fi_nbNvr" min="0" placeholder="Ex: 2">
       </div>
     </div>
-
-    <div class="card">
-      <div class="card-title">👷 Technicien & Intervention</div>
-      <div class="form-grid">
-        <div class="field">
-          <label>Technicien *</label>
-          <input type="text" id="techNom" placeholder="Prénom NOM">
-        </div>
-        <div class="field">
-          <label>Date d'intervention *</label>
-          <input type="date" id="dateIntervention">
-        </div>
-        <div class="field">
-          <label>Heure début</label>
-          <input type="time" id="heureDebut">
-        </div>
-        <div class="field">
-          <label>Heure fin</label>
-          <input type="time" id="heureFin">
-        </div>
-        <div class="field">
-          <label>Numéro d'ordre de mission</label>
-          <input type="text" id="ordreNum" placeholder="OM-2025-XXXX">
-        </div>
-        <div class="field">
-          <label>Contact sur site</label>
-          <input type="text" id="contactSite" placeholder="Nom & tél du gardien / gestionnaire">
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">📋 Contexte de la maintenance</div>
-      <div class="form-grid cols-1">
-        <div class="field">
-          <label>Observations préalables / historique</label>
-          <textarea id="obsPrealables" placeholder="Anomalies connues, historique d'interventions précédentes, remarques client..."></textarea>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">📷 Photos du site</div>
-      <div id="sitePhotosZone">
-        <div class="photo-zone">
-          <div class="photo-zone-title">📍 Local technique / Vue générale</div>
-          <div class="photo-grid" id="photos-site-general"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="actions-row">
-      <button class="btn btn-primary" onclick="goToPage(2)">Suivant → Enregistreur</button>
+    <div class="field" style="margin-top:10px;">
+      <label>Notes générales du site</label>
+      <textarea id="fi_notes" rows="2" placeholder="Particularités, historique du site, remarques importantes..."></textarea>
     </div>
   </div>
+
+  <!-- CLEFS -->
+  <div class="card">
+    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>🔑 Gestion des clefs</span>
+      <button class="btn btn-secondary btn-sm" onclick="addClef()">+ Ajouter une clef</button>
+    </div>
+    <div id="clefsList">
+      <div style="color:var(--text2);font-size:13px;text-align:center;padding:12px;">Aucune clef — cliquez + Ajouter</div>
+    </div>
+  </div>
+
+  <!-- MOTS DE PASSE -->
+  <div class="card">
+    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>🔒 Mots de passe & Accès</span>
+      <button class="btn btn-secondary btn-sm" onclick="addMdp()">+ Ajouter</button>
+    </div>
+    <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--orange);background:rgba(255,170,0,0.08);border:1px solid rgba(255,170,0,0.2);border-radius:4px;padding:3px 8px;">⚠ CONFIDENTIEL</span>
+      <span style="font-size:11px;color:var(--text2);">Stocker localement — ne pas partager par e-mail</span>
+    </div>
+    <div id="mdpsList">
+      <div style="color:var(--text2);font-size:13px;text-align:center;padding:12px;">Aucun accès renseigné — cliquez + Ajouter</div>
+    </div>
+  </div>
+
+  <!-- PLANS -->
+  <div class="card">
+    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>🗺️ Plans d'implantation caméras</span>
+      <button class="btn btn-secondary btn-sm" onclick="addPlan()">+ Ajouter un espace</button>
+    </div>
+    <div style="margin-bottom:10px;font-size:12px;color:var(--text2);">Créez un espace par zone (Hall A, Parking, Cage B…) et listez les caméras avec leur emplacement et IP</div>
+    <div id="plansList">
+      <div style="color:var(--text2);font-size:13px;text-align:center;padding:12px;">Aucun espace — cliquez + Ajouter un espace</div>
+    </div>
+  </div>
+
+  <!-- PHOTOS -->
+  <div class="card">
+    <div class="card-title">📷 Photos du site</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;flex-wrap:wrap;">
+      <div class="photo-zone">
+        <div class="photo-zone-title">🏢 Façade / Vue extérieure</div>
+        <div class="photo-grid" id="photos-fi-facade"></div>
+      </div>
+      <div class="photo-zone">
+        <div class="photo-zone-title">🔌 Local technique / Baie</div>
+        <div class="photo-grid" id="photos-fi-local"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions-row">
+    <button class="btn btn-secondary" onclick="goToPage(0)">← Changer de site</button>
+    <button class="btn btn-secondary" onclick="sauvegarderFicheSite()" style="border-color:var(--green);color:var(--green);">💾 Sauvegarder ce site</button>
+    <button class="btn btn-primary" onclick="goToPage(2)">Passer à la fiche de visite →</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PAGE 2 : FICHE DE VISITE (PRÉVENTIVE / CORRECTIVE)          -->
+<!-- ============================================================ -->
+<div class="page" id="page2">
+  <div class="section-header">
+    <div class="section-tag">Module 02 / 06</div>
+    <div class="section-title">📋 Fiche de visite</div>
+    <div class="section-desc">Saisie de la visite — préremplie depuis la fiche d'identité du site</div>
+  </div>
+
+  <!-- TYPE DE VISITE -->
+  <div class="card">
+    <div class="card-title">🔧 Type d'intervention</div>
+    <div style="display:flex;gap:10px;margin-bottom:14px;">
+      <button id="btnPreventive" class="visite-type-btn active-preventive" onclick="setVisiteType('preventive')">
+        🛡️ Maintenance Préventive
+      </button>
+      <button id="btnCorrective" class="visite-type-btn" onclick="setVisiteType('corrective')">
+        🔧 Maintenance Corrective
+      </button>
+    </div>
+    <div id="visiteTypeLabel" style="font-family:var(--mono);font-size:11px;color:var(--green);background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.2);border-radius:5px;padding:5px 12px;display:inline-block;">
+      MAINTENANCE PRÉVENTIVE
+    </div>
+  </div>
+
+  <!-- SECTION CORRECTIVE (cachée par défaut) -->
+  <div class="card" id="correctiveDetailsCard" style="display:none;border-left:3px solid var(--accent2);">
+    <div class="card-title" style="color:var(--accent2);">🔧 Détails de l'intervention corrective</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Déclencheur *</label>
+        <select id="correctifMotif">
+          <option value="">-- Sélectionner --</option>
+          <option>Appel client / bailleur</option>
+          <option>Alarme / notification système</option>
+          <option>Panne signalée par le gardien</option>
+          <option>Constat lors d'une ronde</option>
+          <option>Vandalisme / dégradation</option>
+          <option>Incident de sécurité</option>
+          <option>Suite visite préventive</option>
+          <option>Autre</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>N° Ticket / Bon de commande correctif</label>
+        <input type="text" id="correctifTicket" placeholder="TKT-2025-XXXX / BC-XXXX">
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px;">
+      <label>Description du problème signalé</label>
+      <textarea id="correctifProbleme" rows="2" placeholder="Décrire le problème signalé par le client ou constaté sur place..."></textarea>
+    </div>
+  </div>
+
+  <!-- SECTION PRÉVENTIVE -->
+  <div class="card" id="preventiveDetailsCard" style="border-left:3px solid var(--green);">
+    <div class="card-title" style="color:var(--green);">🛡️ Planning préventif</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Fréquence de maintenance</label>
+        <select id="preventifFrequence">
+          <option value="">-- Fréquence --</option>
+          <option>Mensuelle</option>
+          <option>Trimestrielle</option>
+          <option>Semestrielle</option>
+          <option>Annuelle</option>
+          <option>Ponctuelle</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Prochaine visite prévisionnelle</label>
+        <input type="date" id="preventifProchaineVisite">
+      </div>
+    </div>
+  </div>
+
+  <!-- INFOS SITE (lecture seule — depuis fiche identité) -->
+  <div class="card" style="border-left:3px solid var(--accent);">
+    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>🏢 Site sélectionné</span>
+      <button class="btn btn-secondary btn-sm" onclick="goToPage(1)" style="font-size:10px;">✏️ Modifier la fiche</button>
+    </div>
+    <div id="siteResumePage2" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <!-- Rempli dynamiquement par prefillInterventionFromFiche() -->
+    </div>
+  </div>
+
+  <!-- TECHNICIEN & DATES -->
+  <div class="card">
+    <div class="card-title">👷 Technicien & Horaires</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Technicien *</label>
+        <input type="text" id="techNom" placeholder="Prénom NOM">
+      </div>
+      <div class="field">
+        <label>Date d'intervention *</label>
+        <input type="date" id="dateIntervention">
+      </div>
+      <div class="field">
+        <label>Heure début</label>
+        <input type="time" id="heureDebut">
+      </div>
+      <div class="field">
+        <label>Heure fin</label>
+        <input type="time" id="heureFin">
+      </div>
+      <div class="field">
+        <label>N° Ordre de mission</label>
+        <input type="text" id="ordreNum" placeholder="OM-2025-XXXX">
+      </div>
+      <div class="field">
+        <label>Contact sur site</label>
+        <input type="text" id="contactSite" placeholder="Nom & tél gardien">
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTEXTE -->
+  <div class="card">
+    <div class="card-title">📋 Contexte & Observations préalables</div>
+    <div class="form-grid cols-1">
+      <div class="field">
+        <label>Observations / historique</label>
+        <textarea id="obsPrealables" placeholder="Anomalies connues, historique, remarques client..."></textarea>
+      </div>
+      <div class="field">
+        <label>Observations de la visite</label>
+        <textarea id="obsVisite" rows="2" placeholder="Remarques terrain pendant la visite..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRAVAUX RÉALISÉS -->
+  <div class="card">
+    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>✅ Travaux généraux réalisés</span>
+      <button class="btn btn-secondary btn-sm" onclick="addTravailRealise()">+ Ajouter</button>
+    </div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:12px;padding:8px 12px;background:rgba(0,212,255,0.05);border-radius:6px;border-left:2px solid var(--accent);">
+      💡 <strong>Périmètre :</strong> travaux généraux du site (NVR, réseau, local technique, câblage général...). Les interventions spécifiques à chaque caméra sont saisies dans le bouton <strong>+ Détail</strong> de chaque caméra — elles apparaissent automatiquement dans le rapport.
+    </div>
+    <div id="travauxRealisesList">
+      <div style="color:var(--text2);font-size:13px;text-align:center;padding:12px;">Aucun travail saisi</div>
+    </div>
+  </div>
+
+  <!-- TRAVAUX À PLANIFIER -->
+  <div class="card">
+    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>📅 Travaux à planifier / retour</span>
+      <button class="btn btn-secondary btn-sm" onclick="addTravailPlanifie()">+ Ajouter</button>
+    </div>
+    <div id="travauxPlanifiesList">
+      <div style="color:var(--text2);font-size:13px;text-align:center;padding:12px;">Aucun travail planifié</div>
+    </div>
+  </div>
+
+  <!-- MATÉRIEL À COMMANDER -->
+  <div class="card">
+    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>🛒 Matériel à commander</span>
+      <button class="btn btn-secondary btn-sm" onclick="addMateriel()">+ Ajouter</button>
+    </div>
+    <div id="materielList">
+      <div style="color:var(--text2);font-size:13px;text-align:center;padding:12px;">Aucun matériel à commander</div>
+    </div>
+  </div>
+
+  <!-- PHOTOS VISITE -->
+  <div class="card">
+    <div class="card-title">📷 Photos du site (visite)</div>
+    <div class="photo-zone">
+      <div class="photo-zone-title">📍 Local technique / Vue générale</div>
+      <div class="photo-grid" id="photos-site-general"></div>
+    </div>
+  </div>
+
+  <div class="actions-row">
+    <button class="btn btn-secondary" onclick="goToPage(1)">← Fiche site</button>
+    <button class="btn btn-primary" onclick="goToPage(4)">Suivant → Enregistreurs</button>
+  </div>
+</div>
+
+
 
 <!-- LIGHTBOX -->
 <div id="photoLightbox">
@@ -1421,9 +1743,9 @@
 </div>
 
   <!-- PAGE 2: NVR/DVR -->
-  <div class="page" id="page2">
+  <div class="page" id="page4">
     <div class="section-header">
-      <div class="section-tag">Étape 02 / 04</div>
+      <div class="section-tag">Étape 04 / 06</div>
       <div class="section-title">Diagnostic NVR / DVR</div>
       <div class="section-desc">État et paramétrage de l'enregistreur vidéo</div>
     </div>
@@ -1437,15 +1759,15 @@
     </div>
 
     <div class="actions-row">
-      <button class="btn btn-secondary" onclick="goToPage(1)">← Retour</button>
-      <button class="btn btn-primary" onclick="goToPage(3)">Suivant → Caméras</button>
+      <button class="btn btn-secondary" onclick="goToPage(2)">← Retour</button>
+      <button class="btn btn-primary" onclick="goToPage(5)">Suivant → Caméras</button>
     </div>
   </div>
 
   <!-- PAGE 3: CAMERAS -->
-  <div class="page" id="page3">
+  <div class="page" id="page5">
     <div class="section-header">
-      <div class="section-tag">Étape 03 / 04</div>
+      <div class="section-tag">Étape 05 / 06</div>
       <div class="section-title">Diagnostic caméras</div>
       <div class="section-desc">Vérification individuelle de chaque caméra du site</div>
     </div>
@@ -1481,15 +1803,17 @@
         <table class="cam-table" id="camTable">
           <thead>
             <tr>
-              <th style="width:40px">#</th>
-              <th style="width:120px">Nom / ID</th>
-              <th style="width:130px">Emplacement</th>
-              <th style="width:90px">Type</th>
-              <th style="width:80px">Marque</th>
-              <th style="width:110px">NVR / DVR</th>
+              <th style="width:36px">#</th>
+              <th>Nom / ID</th>
+              <th>Emplacement</th>
+              <th style="width:70px">Type</th>
+              <th style="width:70px">Marque</th>
+              <th style="width:100px">NVR/DVR</th>
+              <th style="width:100px">IP caméra</th>
+              <th style="width:55px">Voie</th>
               <th>État global</th>
-              <th style="width:70px">Détail</th>
-              <th style="width:36px"></th>
+              <th style="width:65px">Détail</th>
+              <th style="width:28px"></th>
             </tr>
           </thead>
           <tbody id="camTableBody"></tbody>
@@ -1498,15 +1822,15 @@
     </div>
 
     <div class="actions-row">
-      <button class="btn btn-secondary" onclick="goToPage(2)">← Retour</button>
-      <button class="btn btn-primary" onclick="goToPage(4)">Suivant → Synthèse</button>
+      <button class="btn btn-secondary" onclick="goToPage(4)">← Retour</button>
+      <button class="btn btn-primary" onclick="goToPage(6)">Suivant → Synthèse</button>
     </div>
   </div>
 
   <!-- PAGE 4: SYNTHESE + RAPPORT -->
-  <div class="page" id="page4">
+  <div class="page" id="page6">
     <div class="section-header">
-      <div class="section-tag">Étape 04 / 04</div>
+      <div class="section-tag">Étape 06 / 06</div>
       <div class="section-title">Synthèse & Rapport</div>
       <div class="section-desc">Récapitulatif du diagnostic et génération du rapport PDF</div>
     </div>
@@ -1542,12 +1866,18 @@
     </div>
 
     <div class="actions-row">
-      <button class="btn btn-secondary" onclick="goToPage(3)">← Retour</button>
+      <button class="btn btn-secondary" onclick="goToPage(5)">← Retour</button>
+      <button class="btn btn-secondary" onclick="exportFicheSite()" style="border-color:var(--accent);color:var(--accent);">
+        🏢 Fiche Site
+      </button>
+      <button class="btn btn-secondary" onclick="exportFicheMaintenance()" style="border-color:var(--accent2);color:var(--accent2);">
+        📋 Fiche Maintenance
+      </button>
       <button class="btn btn-success" onclick="generateReport()" style="font-size:14px;padding:12px 24px;">
-        📄 Générer le rapport PDF
+        📄 Rapport Complet
       </button>
       <button class="btn btn-primary" onclick="sauvegarderIntervention()" style="background:var(--green);color:#000;">
-        💾 Sauvegarder dans l'historique
+        💾 Sauvegarder
       </button>
     </div>
   </div>
@@ -1689,11 +2019,21 @@
 <script>
 // ==================== STATE ====================
 let state = {
+  currentSiteId: null,
   currentPage: 1,
-  totalPages: 4,
+  totalPages: 6,
   cameras: [],
   nvrs: [],
-  modalCamIndex: null
+  modalCamIndex: null,
+  // Fiche identité
+  clefs: [],
+  mdps: [],
+  plans: [],
+  // Visite de maintenance
+  visiteType: 'preventive',
+  materielCommande: [],
+  travauxRealises: [],
+  travauxPlanifies: []
 };
 
 const CHECK_POINTS = [
@@ -1723,21 +2063,39 @@ document.addEventListener('DOMContentLoaded', () => {
   renderCameras();
   addNVR(); // Start with one NVR
   addCameras(1); // Start with one camera
+  renderClefs();
+  renderMdps();
+  renderPlans();
+  renderMateriel();
+  renderTravauxRealises();
+  renderTravauxPlanifies();
+  renderPhotoZone('photos-fi-facade', 'fi-facade', 'Façade', true);
+  renderPhotoZone('photos-fi-local', 'fi-local', 'Local', true);
+  renderSiteSelectList();
+  goToPage(0);
 });
 
 // ==================== NAVIGATION ====================
 function goToPage(n) {
-  if (n === 4) buildSynthese();
-  if (n === 3) renderCameras(); // Refresh NVR select list
+  if (n === 6) buildSynthese();
+  if (n === 5) renderCameras(); // Refresh NVR select list
+  if (n === 2) { setTimeout(prefillInterventionFromFiche, 100); }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page' + n).classList.add('active');
+  const pg = document.getElementById('page' + n);
+  if (pg) pg.classList.add('active');
   state.currentPage = n;
   renderStepsNav();
+  // Header button highlight
+  const btnF = document.getElementById('btnFicheHdr');
+  const btnI = document.getElementById('btnIntervHdr');
+  if (btnF) btnF.style.fontWeight = n === 1 ? '900' : '700';
+  if (btnI) btnI.style.fontWeight = n === 2 ? '900' : '700';
   window.scrollTo(0, 0);
 }
 
 function renderStepsNav() {
   const nav = document.getElementById('stepsNav');
+  if (state.currentPage === 0) { nav.innerHTML = ''; return; }
   nav.innerHTML = '';
   for (let i = 1; i <= state.totalPages; i++) {
     const dot = document.createElement('div');
@@ -1876,6 +2234,8 @@ function addCameras(countOverride) {
       type: '',
       marque: '',
       nvrId: '',
+      ip: '',
+      voie: '',
       etat: '',
       checks: {},
       anomalies: '',
@@ -1896,7 +2256,7 @@ function removeCamera(id) {
 function renderCameras() {
   const tbody = document.getElementById('camTableBody');
   if (!state.cameras.length) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text2);padding:20px;font-size:13px;">Aucune caméra — Ajouter via le bouton ci-dessus</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--text2);padding:20px;font-size:13px;">Aucune caméra — Ajouter via le bouton ci-dessus</td></tr>';
     return;
   }
 
@@ -1935,6 +2295,8 @@ function renderCameras() {
           ${nvrSelectOptions}
         </select>
       </td>
+      <td><input type="text" value="${cam.ip||''}" placeholder="192.168.x.x" onchange="updateCam(${cam.id},'ip',this.value)" style="font-family:var(--mono);font-size:11px;"></td>
+      <td><input type="text" value="${cam.voie||''}" placeholder="CH01" onchange="updateCam(${cam.id},'voie',this.value)" style="font-family:var(--mono);font-size:11px;text-align:center;"></td>
       <td>
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span class="status-badge ${badgeClass}">${badgeText}</span>
@@ -2070,10 +2432,16 @@ function buildSynthese() {
       <div class="card-title">📊 Résumé du diagnostic</div>
       <div class="summary-section">
         <div class="summary-title">Informations site</div>
-        <div class="summary-row"><span class="key">Bailleur</span><span class="val">${val('baillerNom') || '—'}</span></div>
-        <div class="summary-row"><span class="key">Adresse</span><span class="val">${val('siteAdresse') || '—'}</span></div>
+        <div class="summary-row"><span class="key">Bailleur</span><span class="val">${val('fi_bailleur') || '—'}</span></div>
+        <div class="summary-row"><span class="key">Adresse</span><span class="val">${val('fi_adresse') || '—'}</span></div>
         <div class="summary-row"><span class="key">Technicien</span><span class="val">${val('techNom') || '—'}</span></div>
         <div class="summary-row"><span class="key">Date</span><span class="val">${val('dateIntervention') || '—'}</span></div>
+        <div class="summary-row"><span class="key">Type visite</span><span class="val" style="color:${state.visiteType==='corrective'?'var(--orange)':'var(--green)'}">${state.visiteType === 'corrective' ? '🔧 Corrective' : '🛡️ Préventive'}</span></div>
+        ${state.travauxRealises.length ? `<div class="summary-row"><span class="key">Travaux réalisés</span><span class="val" style="color:var(--green)">${state.travauxRealises.length} action(s)</span></div>` : ''}
+        ${state.travauxPlanifies.length ? `<div class="summary-row"><span class="key">À planifier</span><span class="val" style="color:var(--orange)">${state.travauxPlanifies.length} tâche(s)</span></div>` : ''}
+        ${state.materielCommande.length ? `<div class="summary-row"><span class="key">Matériel à commander</span><span class="val" style="color:var(--accent)">${state.materielCommande.length} référence(s)</span></div>` : ''}
+        ${state.clefs.length ? `<div class="summary-row"><span class="key">Clefs référencées</span><span class="val">${state.clefs.length}</span></div>` : ''}
+        ${state.mdps.length ? `<div class="summary-row"><span class="key">Accès/MDP</span><span class="val">${state.mdps.length} accès</span></div>` : ''}
       </div>
       <div class="summary-section">
         <div class="summary-title">État des caméras</div>
@@ -2116,44 +2484,80 @@ function val(id) {
 }
 
 // ==================== RAPPORT PDF ====================
-function generateReport() {
-  const data = collectData();
+function slugify(str) {
+  return (str || 'site').replace(/\s+/g,'_').toLowerCase().replace(/[^a-z0-9_]/g,'');
+}
 
-  // Send to Python for PDF generation
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = '#';
+function dateSlug(date) {
+  return (date || new Date().toISOString().slice(0,10)).replace(/-/g,'');
+}
 
-  // We'll encode data as JSON and use it
-  showToast('Rapport généré ! Voir le fichier téléchargé.');
-
-  // Generate HTML report for printing as PDF
-  const htmlReport = buildHTMLReport(data);
-  const blob = new Blob([htmlReport], { type: 'text/html;charset=utf-8' });
+function downloadHTML(html, filename) {
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  const dateStr = data.site.date ? data.site.date.replace(/-/g,'') : new Date().toISOString().slice(0,10).replace(/-/g,'');
-  const siteSlug = (data.site.bailleur || 'site').replace(/\s+/g, '_').toLowerCase();
-  a.download = `ESSOR_Diagnostic_${siteSlug}_${dateStr}.html`;
+  a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+  showToast('Fichier téléchargé ✓');
+}
+
+function exportFicheSite() {
+  const data = collectData();
+  downloadHTML(buildFicheSiteHTML(data), `ESSOR_FicheSite_${slugify(data.ficheIdentite.bailleur||data.site.bailleur)}_${dateSlug(data.site.date)}.html`);
+}
+
+function exportFicheMaintenance() {
+  const data = collectData();
+  downloadHTML(buildFicheMaintenanceHTML(data), `ESSOR_Maintenance_${slugify(data.site.bailleur)}_${dateSlug(data.site.date)}.html`);
+}
+
+function generateReport() {
+  const data = collectData();
+  downloadHTML(buildHTMLReport(data), `ESSOR_RapportComplet_${slugify(data.site.bailleur)}_${dateSlug(data.site.date)}.html`);
 }
 
 function collectData() {
   return {
     site: {
-      bailleur: val('baillerNom'),
-      adresse: val('siteAdresse'),
-      ref: val('siteRef'),
-      type: val('siteType'),
+      bailleur: val('fi_bailleur'),
+      adresse: val('fi_adresse'),
+      ref: val('fi_ref'),
+      type: val('fi_type'),
       technicien: val('techNom'),
       date: val('dateIntervention'),
       heureDebut: val('heureDebut'),
       heureFin: val('heureFin'),
       ordre: val('ordreNum'),
-      contact: val('contactSite'),
+      contact: val('contactSite') || val('fi_contact'),
       obsPrealables: val('obsPrealables'),
+    },
+    ficheIdentite: {
+      bailleur: val('fi_bailleur'),
+      adresse: val('fi_adresse'),
+      ref: val('fi_ref'),
+      type: val('fi_type'),
+      contact: val('fi_contact'),
+      nbCameras: val('fi_nbCam'),
+      nbNvr: val('fi_nbNvr'),
+      clefs: state.clefs,
+      mdps: state.mdps,
+      plans: state.plans,
+      notes: val('fi_notes'),
+    },
+    visite: {
+      type: state.visiteType,
+      typeLabel: state.visiteType === 'preventive' ? 'Maintenance préventive' : 'Maintenance corrective',
+      correctifMotif: val('correctifMotif'),
+      correctifTicket: val('correctifTicket'),
+      correctifProbleme: val('correctifProbleme'),
+      preventifFrequence: val('preventifFrequence'),
+      preventifProchaineVisite: val('preventifProchaineVisite'),
+      materielCommande: state.materielCommande,
+      travauxRealises: state.travauxRealises,
+      travauxPlanifies: state.travauxPlanifies,
+      obsVisite: val('obsVisite'),
     },
     nvrs: state.nvrs,
     cameras: state.cameras,
@@ -2163,6 +2567,549 @@ function collectData() {
     visaTech: val('visaTech'),
     visaClient: val('visaClient'),
   };
+}
+
+function buildFicheSiteHTML(data) {
+  const fi = data.ficheIdentite || {};
+  const genDate = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+  const genTime = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+
+  const planRows = (fi.plans||[]).map((plan,pi) => {
+    const camRows = (plan.cameras||[]).map((cam,ci) => `
+      <tr>
+        <td style="font-family:monospace;font-size:9px;color:#888;">${String(ci+1).padStart(2,'0')}</td>
+        <td>${cam.nom||'—'}</td>
+        <td>${cam.emplacement||'—'}</td>
+        <td style="font-family:monospace;font-size:9px;">${cam.ip||'—'}</td>
+        <td style="font-family:monospace;font-size:9px;text-align:center;">${cam.voie||'—'}</td>
+      </tr>`).join('');
+    return `
+      <div style="border:1px solid #e5e7eb;border-left:3px solid #1e6fc4;border-radius:8px;overflow:hidden;margin-bottom:14px;">
+        <div style="background:#f0f7ff;padding:10px 14px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:10px;">
+          <span style="font-family:monospace;font-size:10px;background:#1e6fc4;color:#fff;border-radius:4px;padding:2px 8px;">${String(pi+1).padStart(2,'0')}</span>
+          <strong style="font-size:13px;">${plan.nom||'Espace sans nom'}</strong>
+          ${plan.description?`<span style="font-size:11px;color:#6b7280;">— ${plan.description}</span>`:''}
+        </div>
+        ${(plan.cameras||[]).length?`
+        <table style="width:100%;border-collapse:collapse;font-size:10px;">
+          <thead><tr style="background:#f8fafc;">
+            <th style="padding:6px 10px;text-align:left;font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;border-bottom:1px solid #e5e7eb;">#</th>
+            <th style="padding:6px 10px;text-align:left;font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;border-bottom:1px solid #e5e7eb;">Nom</th>
+            <th style="padding:6px 10px;text-align:left;font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;border-bottom:1px solid #e5e7eb;">Emplacement</th>
+            <th style="padding:6px 10px;text-align:left;font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;border-bottom:1px solid #e5e7eb;">Adresse IP</th>
+            <th style="padding:6px 10px;text-align:left;font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;border-bottom:1px solid #e5e7eb;">Voie NVR</th>
+          </tr></thead>
+          <tbody>${camRows}</tbody>
+        </table>` : '<div style="padding:10px 14px;font-size:11px;color:#9ca3af;">Aucune caméra renseignée</div>'}
+      </div>`;
+  }).join('');
+
+  const clefRows = (fi.clefs||[]).map(c => `
+    <tr>
+      <td>${c.type||'—'}</td>
+      <td style="font-family:monospace;">${c.ref||'—'}</td>
+      <td>${c.lieu||'—'}</td>
+      <td style="text-align:center;">${c.nbCopies||1}</td>
+    </tr>`).join('');
+
+  const mdpRows = (fi.mdps||[]).map(m => `
+    <tr>
+      <td>${m.type||'—'}</td>
+      <td style="font-family:monospace;">${m.ip||'—'}</td>
+      <td style="font-family:monospace;">${m.login||'—'}</td>
+      <td style="font-family:monospace;">${m.password||'—'}</td>
+      <td style="font-size:9px;color:#6b7280;">${m.commentaire||'—'}</td>
+    </tr>`).join('');
+
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Fiche Site — ${fi.bailleur||'Site'}</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;font-size:10.5pt;color:#111827;background:#f8fafc;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+@media print{.no-print{display:none!important;}body{background:#fff;}@page{margin:12mm;size:A4;}}
+.doc{max-width:820px;margin:0 auto;background:#fff;}
+.cover{background:linear-gradient(135deg,#0f1c3f 0%,#1a2d5a 60%,#243b80 100%);color:white;padding:0;position:relative;overflow:hidden;}
+.cover-accent-bar{position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#3b82f6,#06b6d4,#10b981);}
+.cover-content{padding:36px 44px 30px;position:relative;z-index:1;}
+.cover-badge{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:8px;}
+.cover-logo{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:600;color:white;letter-spacing:4px;}
+.cover-title{font-size:13px;font-weight:300;color:rgba(255,255,255,0.7);margin-top:4px;letter-spacing:.5px;}
+.cover-grid{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:flex-start;}
+.cover-site-block{margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.12);display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.cover-field label{font-size:8px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.45);display:block;margin-bottom:3px;}
+.cover-field span{font-size:12px;font-weight:500;color:rgba(255,255,255,0.9);}
+.cover-ref-block{text-align:right;}
+.cover-ref{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,0.5);}
+.cover-ref strong{font-size:13px;color:white;display:block;font-family:'JetBrains Mono',monospace;}
+.body{padding:28px 44px 44px;}
+.sec{margin-bottom:28px;}
+.sec-title{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#1e6fc4;padding-bottom:8px;border-bottom:2px solid #e8f1fb;margin-bottom:14px;}
+.sec-title::before{content:'';width:3px;height:14px;background:#1e6fc4;border-radius:2px;flex-shrink:0;}
+.info-2col{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.info-item{background:#f8fafc;border:1px solid #e5e7eb;border-radius:6px;padding:9px 12px;}
+.info-item label{font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:#6b7280;display:block;margin-bottom:2px;font-weight:500;}
+.info-item span{font-size:10.5px;font-weight:500;}
+.data-table{width:100%;border-collapse:collapse;font-size:9.5px;}
+.data-table th{background:#0f1c3f;color:white;padding:7px 10px;text-align:left;font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;font-weight:600;}
+.data-table th:first-child{border-radius:6px 0 0 0;}.data-table th:last-child{border-radius:0 6px 0 0;}
+.data-table td{padding:8px 10px;border-bottom:1px solid #e5e7eb;vertical-align:middle;color:#374151;}
+.data-table tr:last-child td{border-bottom:none;}
+.obs-block{background:#f8fafc;border:1px solid #e5e7eb;border-radius:6px;padding:10px 14px;}
+.obs-block label{font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:#6b7280;display:block;margin-bottom:4px;font-weight:500;}
+.obs-block p{font-size:10.5px;color:#374151;line-height:1.6;}
+.confid-bar{background:#fffbeb;border:1px solid #fcd34d;border-left:4px solid #f59e0b;border-radius:7px;padding:10px 14px;margin-bottom:12px;font-size:10.5px;color:#78350f;}
+.doc-footer{background:#0f1c3f;padding:14px 44px;display:flex;justify-content:space-between;align-items:center;}
+.doc-footer span{font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(255,255,255,0.4);letter-spacing:.5px;}
+.print-bar{background:#1e293b;padding:12px 44px;display:flex;gap:12px;align-items:center;}
+.pbtn{padding:9px 20px;border:none;border-radius:6px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
+.pbtn-primary{background:#3b82f6;color:#fff;}
+.pbtn-ghost{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);}
+.pbtn-hint{font-size:11px;color:rgba(255,255,255,.4);margin-left:4px;}
+</style>
+</head>
+<body>
+<div class="doc">
+<div class="print-bar no-print">
+  <button class="pbtn pbtn-primary" onclick="window.print()">🖨 Imprimer / PDF</button>
+  <button class="pbtn pbtn-ghost" onclick="window.close()">✕ Fermer</button>
+  <span class="pbtn-hint">Désactiver en-têtes/pieds de page · Activer les arrière-plans</span>
+</div>
+<div class="cover">
+  <div class="cover-accent-bar"></div>
+  <div class="cover-content">
+    <div class="cover-grid">
+      <div>
+        <div class="cover-badge">Fiche d'identité du site — ESSOR</div>
+        <div class="cover-logo">ESSOR</div>
+        <div class="cover-title">Fiche d'Identité — Vidéosurveillance Bailleur Social</div>
+      </div>
+      <div class="cover-ref-block">
+        <div class="cover-ref">Référence site<strong>${fi.ref||'—'}</strong></div>
+      </div>
+    </div>
+    <div class="cover-site-block">
+      <div class="cover-field"><label>Bailleur social</label><span>${fi.bailleur||'—'}</span></div>
+      <div class="cover-field"><label>Adresse du site</label><span>${fi.adresse||'—'}</span></div>
+      <div class="cover-field"><label>Type de site</label><span>${fi.type||'—'}</span></div>
+      <div class="cover-field"><label>Contact</label><span>${fi.contact||'—'}</span></div>
+      <div class="cover-field"><label>Caméras installées</label><span>${fi.nbCameras||'—'}</span></div>
+      <div class="cover-field"><label>NVR / DVR</label><span>${fi.nbNvr||'—'}</span></div>
+    </div>
+  </div>
+</div>
+<div class="body">
+  <div class="sec">
+    <div class="sec-title">Identification du site</div>
+    <div class="info-2col">
+      <div class="info-item"><label>Bailleur social</label><span>${fi.bailleur||'—'}</span></div>
+      <div class="info-item"><label>Adresse</label><span>${fi.adresse||'—'}</span></div>
+      <div class="info-item"><label>Référence site</label><span>${fi.ref||'—'}</span></div>
+      <div class="info-item"><label>Type</label><span>${fi.type||'—'}</span></div>
+      <div class="info-item"><label>Contact sur site</label><span>${fi.contact||'—'}</span></div>
+      <div class="info-item"><label>Nb caméras</label><span>${fi.nbCameras||'—'}</span></div>
+      <div class="info-item"><label>Nb NVR/DVR</label><span>${fi.nbNvr||'—'}</span></div>
+    </div>
+    ${fi.notes?`<div class="obs-block" style="margin-top:8px;"><label>Notes générales</label><p>${fi.notes}</p></div>`:''}
+  </div>
+  ${(fi.clefs||[]).length?`
+  <div class="sec">
+    <div class="sec-title">Gestion des clefs</div>
+    <table class="data-table">
+      <thead><tr><th>Type</th><th>N° / Référence</th><th>Localisation</th><th>Nb copies</th></tr></thead>
+      <tbody>${clefRows}</tbody>
+    </table>
+  </div>`:''}
+  ${(fi.mdps||[]).length?`
+  <div class="sec">
+    <div class="sec-title">Accès et mots de passe</div>
+    <div class="confid-bar">⚠ Document confidentiel — contient les mots de passe en clair. Conserver en lieu sûr. Ne pas transmettre par email non chiffré.</div>
+    <table class="data-table">
+      <thead><tr><th>Équipement</th><th>IP / URL</th><th>Login</th><th>Mot de passe</th><th>Commentaire</th></tr></thead>
+      <tbody>${mdpRows}</tbody>
+    </table>
+  </div>`:''}
+  ${(fi.plans||[]).length?`
+  <div class="sec">
+    <div class="sec-title">Plans d'implantation caméras</div>
+    ${planRows}
+  </div>`:''}
+</div>
+<div class="doc-footer">
+  <span>ESSOR — Fiche Site générée le ${genDate} à ${genTime}</span>
+  <span>${fi.bailleur||''} · ${fi.adresse||''}</span>
+  <span>Réf. ${fi.ref||'—'}</span>
+</div>
+</div>
+</body>
+</html>`;
+}
+
+function buildFicheMaintenanceHTML(data) {
+  const total = data.cameras.length;
+  const ok = data.cameras.filter(c => c.etat === 'ok').length;
+  const ko = data.cameras.filter(c => c.etat === 'ko').length;
+  const warn = data.cameras.filter(c => c.etat === 'warn').length;
+  const pct = total ? Math.round((ok / total) * 100) : 0;
+  const camAnomalie = data.cameras.filter(c => c.etat==='ko'||c.etat==='warn');
+  const dateFormatted = data.site.date ? new Date(data.site.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'}) : '—';
+  const genDate = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+  const genTime = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  const v = data.visite || {};
+  const isCorrectif = v.type === 'corrective';
+
+  const scoreColor = pct>=90?'#166534':pct>=70?'#92400e':'#991b1b';
+  const scoreBg    = pct>=90?'#eaf6ef':pct>=70?'#fff8e1':'#fdecea';
+  const scoreBorder= pct>=90?'#86efac':pct>=70?'#fcd34d':'#fca5a5';
+  const scoreLabel = pct>=90?'Excellent':pct>=70?'Satisfaisant':pct>=50?'Dégradé':'Critique';
+
+  const CHECK_LABELS = {image:'Image',enregistrement:'Enreg.',ir:'IR nuit',orientation:'Orient.',optique:'Optique',cablage:'Câblage',fixation:'Fixation',horodatage:'Horodat.'};
+  const clBg  = (v) => v==='ok'?'#eaf6ef':v==='ko'?'#fdecea':v==='warn'?'#fff8e1':'#f3f4f6';
+  const clColor= (v) => v==='ok'?'#166534':v==='ko'?'#991b1b':v==='warn'?'#92400e':'#9ca3af';
+  const clLabel= (v) => v==='ok'?'✓':v==='ko'?'✗':v==='warn'?'!':'–';
+
+  const etatBadge=(etat)=>{
+    if(etat==='ok') return `<span style="background:#eaf6ef;color:#166534;border:1px solid #86efac;border-radius:20px;padding:3px 10px;font-size:9px;font-weight:700;">✓ OK</span>`;
+    if(etat==='ko') return `<span style="background:#fdecea;color:#991b1b;border:1px solid #fca5a5;border-radius:20px;padding:3px 10px;font-size:9px;font-weight:700;">✗ KO</span>`;
+    if(etat==='warn') return `<span style="background:#fff8e1;color:#92400e;border:1px solid #fcd34d;border-radius:20px;padding:3px 10px;font-size:9px;font-weight:700;">! DÉGRADÉ</span>`;
+    return `<span style="background:#f3f4f6;color:#9ca3af;border-radius:20px;padding:3px 10px;font-size:9px;">—</span>`;
+  };
+
+  const nvrBadge=(val,okV,warnV,koV)=>{
+    if(val===okV) return `<span style="background:#eaf6ef;color:#166534;border:1px solid #86efac;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;">${val}</span>`;
+    if(val===warnV) return `<span style="background:#fff8e1;color:#92400e;border:1px solid #fcd34d;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;">${val}</span>`;
+    if(val===koV) return `<span style="background:#fdecea;color:#991b1b;border:1px solid #fca5a5;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;">${val}</span>`;
+    return `<span style="background:#f3f4f6;color:#6b7280;border-radius:4px;padding:2px 8px;font-size:10px;">—</span>`;
+  };
+
+  const trRealises = (v.travauxRealises||[]).map(t=>`<tr><td>${t.type||'—'}</td><td>${t.description||'—'}</td><td style="font-family:monospace;font-size:9px;">${t.cam||'—'}</td></tr>`).join('');
+  const trPlanifies = (v.travauxPlanifies||[]).map(t=>`<tr><td>${t.description||'—'}</td><td><span style="font-size:9px;padding:2px 7px;border-radius:4px;background:${t.urgence&&t.urgence.includes('Urgent')?'#fdecea':t.urgence&&t.urgence.includes('Moyen')?'#fff8e1':'#f3f4f6'};color:${t.urgence&&t.urgence.includes('Urgent')?'#991b1b':t.urgence&&t.urgence.includes('Moyen')?'#92400e':'#6b7280'};font-weight:700;">${t.urgence||'—'}</span></td><td style="font-family:monospace;font-size:9px;">${t.cam||'—'}</td></tr>`).join('');
+  const matRows = (v.materielCommande||[]).map(m=>`<tr><td>${m.designation||'—'}</td><td style="text-align:center;font-family:monospace;font-weight:700;">${m.qte||1}</td><td style="font-family:monospace;font-size:9px;">${m.ref||'—'}</td></tr>`).join('');
+
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Fiche Maintenance — ${data.site.bailleur||'Site'} — ${data.site.date||''}</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;font-size:10.5pt;color:#111827;background:#f8fafc;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+@media print{.no-print{display:none!important;}body{background:#fff;}.avoid-break{page-break-inside:avoid;}@page{margin:12mm;size:A4;}}
+.doc{max-width:820px;margin:0 auto;background:#fff;}
+.cover{background:linear-gradient(135deg,${isCorrectif?'#3b1010 0%,#6b1a1a 60%,#8b2020':'#0f1c3f 0%,#1a2d5a 60%,#243b80'} 100%);color:white;padding:0;position:relative;overflow:hidden;}
+.cover-accent-bar{position:absolute;top:0;left:0;right:0;height:5px;background:${isCorrectif?'linear-gradient(90deg,#ef4444,#f97316,#eab308)':'linear-gradient(90deg,#3b82f6,#06b6d4,#10b981)'};}
+.cover-content{padding:36px 44px 30px;position:relative;z-index:1;}
+.cover-badge{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:8px;}
+.cover-logo{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:600;color:white;letter-spacing:4px;}
+.cover-title{font-size:13px;font-weight:300;color:rgba(255,255,255,0.7);margin-top:4px;letter-spacing:.5px;}
+.cover-grid{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:flex-start;}
+.cover-site-block{margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.12);display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.cover-field label{font-size:8px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.45);display:block;margin-bottom:3px;}
+.cover-field span{font-size:12px;font-weight:500;color:rgba(255,255,255,0.9);}
+.cover-ref-block{text-align:right;}
+.cover-ref{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,0.5);}
+.cover-ref strong{font-size:13px;color:white;display:block;font-family:'JetBrains Mono',monospace;}
+.score-banner{background:#fff;border-bottom:1px solid #e5e7eb;padding:18px 44px;display:grid;grid-template-columns:auto 1fr auto auto auto auto;gap:20px;align-items:center;}
+.score-circle{width:68px;height:68px;border-radius:50%;background:${scoreBg};border:2px solid ${scoreBorder};display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
+.score-pct{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:${scoreColor};line-height:1;}
+.score-lbl{font-size:8px;font-weight:600;color:${scoreColor};letter-spacing:.5px;margin-top:1px;}
+.score-bar-wrap{flex:1;}
+.score-bar-label{font-size:11px;font-weight:600;color:#111827;margin-bottom:5px;}
+.score-bar-label span{font-size:10px;font-weight:400;color:#6b7280;margin-left:8px;}
+.score-bar-track{height:8px;background:#f3f4f6;border-radius:4px;overflow:hidden;}
+.score-bar-fill{height:100%;width:${pct}%;background:${pct>=90?'linear-gradient(90deg,#16a34a,#22c55e)':pct>=70?'linear-gradient(90deg,#d97706,#f59e0b)':'linear-gradient(90deg,#dc2626,#ef4444)'};border-radius:4px;}
+.kpi{text-align:center;padding:7px 14px;border-radius:8px;min-width:60px;}
+.kpi-n{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;line-height:1;}
+.kpi-l{font-size:9px;text-transform:uppercase;letter-spacing:.8px;margin-top:2px;font-weight:500;}
+.kpi-total{background:#f8fafc;border:1px solid #e5e7eb;}.kpi-total .kpi-n{color:#111827;}.kpi-total .kpi-l{color:#6b7280;}
+.kpi-ok{background:#eaf6ef;border:1px solid #86efac;}.kpi-ok .kpi-n{color:#166534;}.kpi-ok .kpi-l{color:#166534;}
+.kpi-warn{background:#fff8e1;border:1px solid #fcd34d;}.kpi-warn .kpi-n{color:#92400e;}.kpi-warn .kpi-l{color:#92400e;}
+.kpi-ko{background:#fdecea;border:1px solid #fca5a5;}.kpi-ko .kpi-n{color:#991b1b;}.kpi-ko .kpi-l{color:#991b1b;}
+.body{padding:24px 44px 44px;}
+.sec{margin-bottom:24px;}
+.sec-title{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#1e6fc4;padding-bottom:7px;border-bottom:2px solid #e8f1fb;margin-bottom:12px;}
+.sec-title::before{content:'';width:3px;height:14px;background:#1e6fc4;border-radius:2px;flex-shrink:0;}
+.info-2col{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.info-item{background:#f8fafc;border:1px solid #e5e7eb;border-radius:6px;padding:9px 12px;}
+.info-item label{font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:#6b7280;display:block;margin-bottom:2px;font-weight:500;}
+.info-item span{font-size:10.5px;font-weight:500;}
+.correctif-banner{background:#fef2f2;border:1px solid #fca5a5;border-left:4px solid #ef4444;border-radius:8px;padding:14px 18px;margin-bottom:16px;}
+.correctif-banner-title{font-size:11px;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
+.data-table{width:100%;border-collapse:collapse;font-size:9.5px;}
+.data-table th{background:#0f1c3f;color:white;padding:7px 10px;text-align:left;font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;font-weight:600;}
+.data-table th:first-child{border-radius:6px 0 0 0;}.data-table th:last-child{border-radius:0 6px 0 0;}
+.data-table td{padding:8px 10px;border-bottom:1px solid #e5e7eb;vertical-align:middle;color:#374151;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table .notes-row td{background:#fffbeb;font-size:9px;color:#78350f;padding:5px 10px;border-left:3px solid #fcd34d;}
+.cam-card{border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;background:#fff;margin-bottom:8px;}
+.cam-card.cam-ok{border-left:3px solid #22c55e;}.cam-card.cam-ko{border-left:3px solid #ef4444;}.cam-card.cam-warn{border-left:3px solid #f59e0b;}.cam-card.cam-na{border-left:3px solid #d1d5db;}
+.cam-head{display:grid;grid-template-columns:36px 1fr auto auto;gap:12px;align-items:center;padding:10px 14px;background:#f8fafc;border-bottom:1px solid #e5e7eb;}
+.cam-num{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:#6b7280;text-align:center;}
+.cam-name{font-size:11px;font-weight:600;color:#111827;}
+.cam-loc{font-size:9.5px;color:#6b7280;margin-top:1px;}
+.cam-type-badge{font-size:9px;padding:3px 8px;border-radius:4px;background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db;font-weight:500;white-space:nowrap;}
+.cam-body{padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.checks-row{display:flex;flex-wrap:wrap;gap:5px;}
+.check-pill{font-size:9px;font-weight:600;padding:3px 8px;border-radius:20px;font-family:'JetBrains Mono',monospace;border:1px solid;white-space:nowrap;}
+.anomaly-box{grid-column:1/-1;background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;padding:8px 12px;font-size:9.5px;}
+.anomaly-box .anom-label{font-weight:700;color:#92400e;font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;}
+.anomaly-box .anom-text{color:#78350f;line-height:1.5;}
+.action-box{grid-column:1/-1;background:#eaf6ef;border:1px solid #86efac;border-radius:6px;padding:8px 12px;font-size:9.5px;}
+.action-box .act-label{font-weight:700;color:#166534;font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;}
+.action-box .act-text{color:#14532d;line-height:1.5;}
+.prio-table{width:100%;border-collapse:collapse;font-size:9.5px;}
+.prio-table th{background:#1f2937;color:#f9fafb;padding:8px 12px;text-align:left;font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;}
+.prio-table th:first-child{border-radius:6px 0 0 0;}.prio-table th:last-child{border-radius:0 6px 0 0;}
+.prio-table td{padding:9px 12px;border-bottom:1px solid #e5e7eb;vertical-align:top;}
+.prio-table tr.prio-ko td{background:#fef2f2;}.prio-table tr.prio-warn td{background:#fffbeb;}
+.prio-table tr:last-child td{border-bottom:none;}
+.crit-badge{font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace;padding:3px 8px;border-radius:4px;white-space:nowrap;}
+.crit-critique{background:#fdecea;color:#991b1b;border:1px solid #fca5a5;}
+.crit-moyen{background:#fff8e1;color:#92400e;border:1px solid #fcd34d;}
+.crit-faible{background:#eaf6ef;color:#166534;border:1px solid #86efac;}
+.crit-na{background:#f3f4f6;color:#6b7280;border:1px solid #d1d5db;}
+.conclusion-box{background:linear-gradient(135deg,#f0f7ff,#e8f1fb);border:1px solid #bfdbfe;border-left:4px solid #1e6fc4;border-radius:8px;padding:14px 18px;margin-bottom:12px;}
+.conclusion-box label{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#1e6fc4;display:block;margin-bottom:5px;}
+.conclusion-box p{font-size:10.5px;color:#374151;line-height:1.7;}
+.actions-box{background:#f0fdf4;border:1px solid #bbf7d0;border-left:4px solid #16a34a;border-radius:8px;padding:14px 18px;}
+.actions-box label{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#166534;display:block;margin-bottom:5px;}
+.actions-box p{font-size:10.5px;color:#14532d;line-height:1.7;}
+.sign-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.sign-card{border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;}
+.sign-head{background:#0f1c3f;color:white;padding:8px 14px;font-size:9px;text-transform:uppercase;letter-spacing:1px;font-weight:600;}
+.sign-body{padding:14px;min-height:64px;background:#fff;display:flex;flex-direction:column;justify-content:space-between;}
+.sign-value{font-size:14px;font-weight:600;color:#111827;font-family:'JetBrains Mono',monospace;}
+.sign-line{border-bottom:1px dashed #d1d5db;margin-top:auto;padding-top:8px;font-size:8.5px;color:#6b7280;}
+.obs-block{background:#f8fafc;border:1px solid #e5e7eb;border-radius:6px;padding:10px 14px;}
+.obs-block label{font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:#6b7280;display:block;margin-bottom:4px;font-weight:500;}
+.obs-block p{font-size:10.5px;color:#374151;line-height:1.6;}
+.doc-footer{background:#0f1c3f;padding:14px 44px;display:flex;justify-content:space-between;align-items:center;}
+.doc-footer span{font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(255,255,255,0.4);letter-spacing:.5px;}
+.print-bar{background:#1e293b;padding:12px 44px;display:flex;gap:12px;align-items:center;}
+.pbtn{padding:9px 20px;border:none;border-radius:6px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
+.pbtn-primary{background:#3b82f6;color:#fff;}
+.pbtn-ghost{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);}
+.pbtn-hint{font-size:11px;color:rgba(255,255,255,.4);margin-left:4px;}
+</style>
+</head>
+<body>
+<div class="doc">
+<div class="print-bar no-print">
+  <button class="pbtn pbtn-primary" onclick="window.print()">🖨 Imprimer / PDF</button>
+  <button class="pbtn pbtn-ghost" onclick="window.close()">✕ Fermer</button>
+  <span class="pbtn-hint">Désactiver en-têtes/pieds de page · Activer les arrière-plans</span>
+</div>
+<div class="cover">
+  <div class="cover-accent-bar"></div>
+  <div class="cover-content">
+    <div class="cover-grid">
+      <div>
+        <div class="cover-badge">${v.typeLabel||'Maintenance'} — ESSOR</div>
+        <div class="cover-logo">ESSOR</div>
+        <div class="cover-title">Fiche de Maintenance — Vidéosurveillance</div>
+      </div>
+      <div class="cover-ref-block">
+        <div class="cover-ref">Ordre de mission<strong>${data.site.ordre||'—'}</strong></div>
+        ${isCorrectif&&v.correctifTicket?`<div class="cover-ref" style="margin-top:4px;">Ticket<strong>${v.correctifTicket}</strong></div>`:''}
+        <div style="font-family:monospace;font-size:10px;color:rgba(255,255,255,.5);margin-top:8px;">${dateFormatted}</div>
+      </div>
+    </div>
+    <div class="cover-site-block">
+      <div class="cover-field"><label>Bailleur social</label><span>${data.site.bailleur||'—'}</span></div>
+      <div class="cover-field"><label>Adresse</label><span>${data.site.adresse||'—'}</span></div>
+      <div class="cover-field"><label>Technicien</label><span>${data.site.technicien||'—'}</span></div>
+      <div class="cover-field"><label>Type d'intervention</label><span>${v.typeLabel||'—'}</span></div>
+      <div class="cover-field"><label>Horaires</label><span>${data.site.heureDebut||'—'} → ${data.site.heureFin||'—'}</span></div>
+      <div class="cover-field"><label>Contact sur site</label><span>${data.site.contact||'—'}</span></div>
+    </div>
+  </div>
+</div>
+<div class="score-banner">
+  <div class="score-circle">
+    <div class="score-pct">${pct}%</div>
+    <div class="score-lbl">${scoreLabel}</div>
+  </div>
+  <div class="score-bar-wrap">
+    <div class="score-bar-label">Taux d'opérabilité <span>${ok} caméras OK sur ${total}</span></div>
+    <div class="score-bar-track"><div class="score-bar-fill"></div></div>
+  </div>
+  <div class="kpi kpi-total"><div class="kpi-n">${total}</div><div class="kpi-l">Total</div></div>
+  <div class="kpi kpi-ok"><div class="kpi-n">${ok}</div><div class="kpi-l">✓ OK</div></div>
+  <div class="kpi kpi-warn"><div class="kpi-n">${warn}</div><div class="kpi-l">! Dégradé</div></div>
+  <div class="kpi kpi-ko"><div class="kpi-n">${ko}</div><div class="kpi-l">✗ KO</div></div>
+</div>
+<div class="body">
+  ${isCorrectif&&(v.correctifMotif||v.correctifProbleme)?`
+  <div class="sec avoid-break">
+    <div class="sec-title">Détails intervention corrective</div>
+    <div class="correctif-banner">
+      <div class="correctif-banner-title">🔧 Maintenance Corrective</div>
+      <div class="info-2col" style="gap:6px;">
+        <div class="info-item" style="border-color:#fca5a5;"><label>Déclencheur</label><span>${v.correctifMotif||'—'}</span></div>
+        <div class="info-item" style="border-color:#fca5a5;"><label>N° Ticket / BC</label><span style="font-family:monospace;">${v.correctifTicket||'—'}</span></div>
+      </div>
+      ${v.correctifProbleme?`<div style="margin-top:8px;font-size:10.5px;color:#7f1d1d;line-height:1.6;"><strong>Problème signalé :</strong> ${v.correctifProbleme}</div>`:''}
+    </div>
+  </div>`:''}
+  ${!isCorrectif&&(v.preventifFrequence||v.preventifProchaineVisite)?`
+  <div class="sec avoid-break">
+    <div class="sec-title">Planning préventif</div>
+    <div class="info-2col">
+      <div class="info-item"><label>Fréquence</label><span>${v.preventifFrequence||'—'}</span></div>
+      <div class="info-item"><label>Prochaine visite</label><span>${v.preventifProchaineVisite?new Date(v.preventifProchaineVisite).toLocaleDateString('fr-FR'):'—'}</span></div>
+    </div>
+  </div>`:''}
+  <div class="sec avoid-break">
+    <div class="sec-title">Informations de l'intervention</div>
+    <div class="info-2col">
+      <div class="info-item"><label>Bailleur social</label><span>${data.site.bailleur||'—'}</span></div>
+      <div class="info-item"><label>Adresse</label><span>${data.site.adresse||'—'}</span></div>
+      <div class="info-item"><label>Technicien</label><span>${data.site.technicien||'—'}</span></div>
+      <div class="info-item"><label>Date</label><span>${dateFormatted}</span></div>
+      <div class="info-item"><label>Horaires</label><span>${data.site.heureDebut||'—'} → ${data.site.heureFin||'—'}</span></div>
+      <div class="info-item"><label>Ordre de mission</label><span style="font-family:monospace;">${data.site.ordre||'—'}</span></div>
+      <div class="info-item"><label>Contact sur site</label><span>${data.site.contact||'—'}</span></div>
+      <div class="info-item"><label>Type d'intervention</label><span style="font-weight:700;color:${isCorrectif?'#991b1b':'#166534'}">${v.typeLabel||'—'}</span></div>
+    </div>
+    ${data.site.obsPrealables?`<div class="obs-block" style="margin-top:8px;"><label>Observations préalables</label><p>${data.site.obsPrealables}</p></div>`:''}
+    ${v.obsVisite?`<div class="obs-block" style="margin-top:8px;"><label>Observations de la visite</label><p>${v.obsVisite}</p></div>`:''}
+  </div>
+  ${(v.travauxRealises||[]).length?`
+  <div class="sec avoid-break">
+    <div class="sec-title">Travaux généraux réalisés</div>
+    <table class="data-table">
+      <thead><tr><th>Type d'action</th><th>Description</th><th>Équipement</th></tr></thead>
+      <tbody>${trRealises}</tbody>
+    </table>
+  </div>`:''}
+  ${(v.travauxPlanifies||[]).length?`
+  <div class="sec avoid-break">
+    <div class="sec-title">Travaux à planifier</div>
+    <table class="data-table">
+      <thead><tr><th>Action à effectuer</th><th>Urgence</th><th>Équipement</th></tr></thead>
+      <tbody>${trPlanifies}</tbody>
+    </table>
+  </div>`:''}
+  ${(v.materielCommande||[]).length?`
+  <div class="sec avoid-break">
+    <div class="sec-title">Matériel à commander</div>
+    <table class="data-table">
+      <thead><tr><th>Désignation</th><th style="text-align:center;">Qté</th><th>Référence</th></tr></thead>
+      <tbody>${matRows}</tbody>
+    </table>
+  </div>`:''}
+  ${data.nvrs.length?`
+  <div class="sec avoid-break">
+    <div class="sec-title">Enregistreurs (NVR / DVR)</div>
+    <table class="data-table">
+      <thead><tr><th>#</th><th>Marque / Modèle</th><th>IP</th><th>Firmware</th><th>Voies</th><th>HDD</th><th>Rétention</th><th>État</th></tr></thead>
+      <tbody>
+        ${data.nvrs.map((nvr,i)=>`
+          <tr>
+            <td style="font-family:monospace;font-size:9px;color:#9ca3af;">${String(i+1).padStart(2,'0')}</td>
+            <td><strong>${nvr.marque||'—'}</strong>${nvr.modele?` <span style="color:#6b7280;">${nvr.modele}</span>`:''}</td>
+            <td style="font-family:monospace;font-size:9px;">${nvr.ip||'—'}</td>
+            <td style="font-family:monospace;font-size:9px;">${nvr.firmware||'—'}</td>
+            <td style="text-align:center;">${nvr.nbVoies||'—'}</td>
+            <td>${nvrBadge(nvr.hddEtat,'OK','Dégradé','En erreur')}</td>
+            <td style="text-align:center;font-weight:600;">${nvr.stockage||'—'}</td>
+            <td>${nvrBadge(nvr.etatGeneral,'Opérationnel','Dégradé','Hors service')}</td>
+          </tr>
+          ${nvr.notes?`<tr class="notes-row"><td colspan="8">📝 ${nvr.notes}</td></tr>`:''}
+        `).join('')}
+      </tbody>
+    </table>
+  </div>`:''}
+  ${camAnomalie.length?`
+  <div class="sec avoid-break">
+    <div class="sec-title">Anomalies prioritaires — ${camAnomalie.length} caméra${camAnomalie.length>1?'s':''}</div>
+    <table class="prio-table">
+      <thead><tr><th>#</th><th>Caméra</th><th>Emplacement</th><th>État</th><th>Criticité</th><th>Anomalie</th><th>Action réalisée</th></tr></thead>
+      <tbody>
+        ${camAnomalie.map((cam,i)=>`
+          <tr class="${cam.etat==='ko'?'prio-ko':'prio-warn'}">
+            <td style="font-family:monospace;font-size:9px;color:#6b7280;">${String(i+1).padStart(2,'0')}</td>
+            <td><strong>${cam.nom||'CAM-'+String(data.cameras.indexOf(cam)+1).padStart(2,'0')}</strong><br><span style="font-size:8.5px;color:#6b7280;">${cam.type||''} ${cam.marque||''}</span></td>
+            <td style="font-size:9.5px;">${cam.emplacement||'—'}</td>
+            <td>${cam.etat==='ko'?`<span class="crit-badge crit-critique">✗ KO</span>`:`<span class="crit-badge crit-moyen">! DÉGRADÉ</span>`}</td>
+            <td>${cam.criticite?`<span class="crit-badge ${cam.criticite==='critique'?'crit-critique':cam.criticite==='moyen'?'crit-moyen':'crit-faible'}">${cam.criticite}</span>`:`<span class="crit-badge crit-na">—</span>`}</td>
+            <td style="font-size:9.5px;">${cam.anomalies||'—'}</td>
+            <td style="font-size:9.5px;">${cam.actions||'—'}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`:''}
+  <div class="sec">
+    <div class="sec-title">État détaillé des caméras</div>
+    ${data.cameras.map((cam,i)=>{
+      const cls = cam.etat==='ok'?'cam-ok':cam.etat==='ko'?'cam-ko':cam.etat==='warn'?'cam-warn':'cam-na';
+      const checks = Object.entries(cam.checks||{});
+      const nvr = data.nvrs.find(n=>String(n.id)===String(cam.nvrId));
+      const nvrLabel = nvr?([nvr.marque,nvr.modele].filter(Boolean).join(' ')||('NVR #'+(data.nvrs.indexOf(nvr)+1))):null;
+      return `<div class="cam-card ${cls} avoid-break">
+        <div class="cam-head">
+          <div class="cam-num">${String(i+1).padStart(2,'0')}</div>
+          <div>
+            <div class="cam-name">${cam.nom||'CAM-'+String(i+1).padStart(2,'0')}</div>
+            <div class="cam-loc">${cam.emplacement||'—'}${nvrLabel?` · <span style="font-size:8px;color:#888;">🖥 ${nvrLabel}</span>`:''}</div>
+          </div>
+          <div class="cam-type-badge">${[cam.type,cam.marque].filter(Boolean).join(' · ')||'—'}</div>
+          <div>${etatBadge(cam.etat)}</div>
+        </div>
+        <div class="cam-body">
+          <div>
+            <div style="font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;font-weight:600;margin-bottom:5px;">Points de contrôle</div>
+            <div class="checks-row">
+              ${checks.length?checks.map(([k,v])=>`<span class="check-pill" style="background:${clBg(v)};color:${clColor(v)};border-color:${clColor(v)}30;">${clLabel(v)} ${CHECK_LABELS[k]||k}</span>`).join(''):'<span style="font-size:9px;color:#9ca3af;">Non renseigné</span>'}
+            </div>
+          </div>
+          <div></div>
+          ${cam.anomalies?`<div class="anomaly-box"><div class="anom-label">Anomalie constatée</div><div class="anom-text">${cam.anomalies}</div></div>`:''}
+          ${cam.actions?`<div class="action-box"><div class="act-label">Action réalisée sur place</div><div class="act-text">${cam.actions}</div></div>`:''}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+  ${(data.conclusion||data.actionsRetour)?`
+  <div class="sec avoid-break">
+    <div class="sec-title">Conclusion & Préconisations</div>
+    ${data.conclusion?`<div class="conclusion-box"><label>Conclusion</label><p>${data.conclusion}</p></div>`:''}
+    ${data.actionsRetour?`<div class="actions-box"><label>Actions à planifier</label><p>${data.actionsRetour}</p></div>`:''}
+  </div>`:''}
+  <div class="sec avoid-break">
+    <div class="sec-title">Signatures</div>
+    <div class="sign-grid">
+      <div class="sign-card">
+        <div class="sign-head">Technicien intervenant</div>
+        <div class="sign-body">
+          <div style="font-size:9.5px;color:#6b7280;margin-bottom:6px;">${data.site.technicien||'—'} · ${dateFormatted}</div>
+          <div class="sign-value">${data.visaTech||''}</div>
+          <div class="sign-line">Signature / Visa technicien</div>
+        </div>
+      </div>
+      <div class="sign-card">
+        <div class="sign-head">Représentant du bailleur</div>
+        <div class="sign-body">
+          <div style="font-size:9.5px;color:#6b7280;margin-bottom:6px;">${data.site.contact||'Contact non renseigné'}</div>
+          <div class="sign-value">${data.visaClient||''}</div>
+          <div class="sign-line">Bon pour accord</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="doc-footer">
+  <span>ESSOR — Fiche Maintenance générée le ${genDate} à ${genTime}</span>
+  <span>${data.site.bailleur||''} · ${data.site.adresse||''}</span>
+  <span>${v.typeLabel||''} · Réf. ${data.site.ordre||'—'}</span>
+</div>
+</div>
+</body>
+</html>`;
 }
 
 function buildHTMLReport(data) {
@@ -2725,7 +3672,7 @@ body{font-family:'Inter',sans-serif;font-size:10.5pt;color:var(--text);backgroun
   <div class="cover-content">
     <div class="cover-grid">
       <div>
-        <div class="cover-badge">Rapport de Maintenance Préventive — ESSOR</div>
+        <div class="cover-badge">${data.visite ? data.visite.typeLabel : 'Rapport de Maintenance'} — ESSOR</div>
         <div style="display:flex;align-items:center;gap:12px;"><div style="width:36px;height:36px;background:rgba(255,255,255,0.15);border-radius:6px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.2);"><svg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" fill=\"none\"><polygon points=\"10,1 19,5.5 19,14.5 10,19 1,14.5 1,5.5\" stroke=\"rgba(255,255,255,0.8)\" stroke-width=\"1.5\" fill=\"none\"/><polygon points=\"10,5 15,7.5 15,12.5 10,15 5,12.5 5,7.5\" stroke=\"rgba(255,255,255,0.5)\" stroke-width=\"1\" fill=\"none\"/></svg></div><div><div style="font-family:monospace;font-size:22px;font-weight:700;color:white;letter-spacing:4px;line-height:1;">ESSOR</div><div style="font-family:monospace;font-size:11px;font-weight:300;color:rgba(255,255,255,0.5);letter-spacing:2px;">Diagnostic</div></div></div>
         <div class="cover-title">Système de Vidéosurveillance — Diagnostic Complet</div>
       </div>
@@ -2956,6 +3903,125 @@ body{font-family:'Inter',sans-serif;font-size:10.5pt;color:var(--text);backgroun
 </div><!-- /doc -->
 </body>
 </html>`;
+}
+
+// ==================== GESTION SITES ====================
+const SITES_KEY = 'essor_sites_v1';
+
+function loadSites() {
+  try { return JSON.parse(localStorage.getItem(SITES_KEY) || '[]'); } catch(e) { return []; }
+}
+
+function saveSites(list) {
+  localStorage.setItem(SITES_KEY, JSON.stringify(list));
+}
+
+function renderSiteSelectList() {
+  const container = document.getElementById('siteSelectList');
+  if (!container) return;
+  const sites = loadSites();
+  if (!sites.length) {
+    container.innerHTML = `<div class="site-selector-empty"><div class="site-selector-empty-icon">🏢</div><div class="site-selector-empty-text">Aucun site enregistré.<br>Créez votre première fiche site.</div></div>`;
+    return;
+  }
+  container.innerHTML = `<div class="site-select-list">` +
+    sites.map(site => {
+      const fi = site.ficheIdentite || {};
+      const nbClefs = (fi.clefs||[]).length;
+      const nbMdp = (fi.mdps||[]).length;
+      const nbPlans = (fi.plans||[]).length;
+      return `<div class="site-select-card" onclick="selectionnerSite('${site.id}')">
+        <div class="site-select-card-icon">🏢</div>
+        <div class="site-select-card-info">
+          <div class="site-select-card-name">${fi.bailleur || 'Bailleur non renseigné'}</div>
+          <div class="site-select-card-addr">📍 ${fi.adresse || 'Adresse non renseignée'}${fi.ref ? ` · Réf. ${fi.ref}` : ''}</div>
+          <div class="site-select-card-meta">
+            ${fi.type ? `<span>🏗 ${fi.type}</span>` : ''}
+            <span>📷 ${fi.nbCameras||'—'} caméras</span>
+            ${nbClefs ? `<span>🔑 ${nbClefs} clef${nbClefs>1?'s':''}</span>` : ''}
+            ${nbMdp ? `<span>🔒 ${nbMdp} accès</span>` : ''}
+            ${nbPlans ? `<span>🗺 ${nbPlans} plan${nbPlans>1?'s':''}</span>` : ''}
+          </div>
+        </div>
+        <div class="site-select-card-actions" onclick="event.stopPropagation()">
+          <button class="site-sel-btn site-sel-btn-select" onclick="selectionnerSite('${site.id}')">→ Ouvrir</button>
+          <button class="site-sel-btn site-sel-btn-del" onclick="supprimerSite('${site.id}', event)">✕</button>
+        </div>
+      </div>`;
+    }).join('') + `</div>`;
+}
+
+function selectionnerSite(id) {
+  const sites = loadSites();
+  const site = sites.find(s => s.id === id);
+  if (!site) return;
+  const fi = site.ficheIdentite || {};
+  const fieldMap = {
+    fi_bailleur: fi.bailleur, fi_adresse: fi.adresse, fi_ref: fi.ref,
+    fi_type: fi.type, fi_contact: fi.contact, fi_nbCam: fi.nbCameras,
+    fi_nbNvr: fi.nbNvr, fi_notes: fi.notes,
+  };
+  Object.entries(fieldMap).forEach(([fieldId, val]) => {
+    const el = document.getElementById(fieldId);
+    if (el && val !== undefined && val !== null) el.value = val;
+  });
+  state.clefs = (fi.clefs || []).map(c => ({...c, id: c.id || (Date.now() + Math.random())}));
+  state.mdps  = (fi.mdps  || []).map(m => ({...m, id: m.id || (Date.now() + Math.random()), visible: false}));
+  state.plans = (fi.plans || []).map(p => ({...p, id: p.id || (Date.now() + Math.random())}));
+  state.currentSiteId = id;
+  renderClefs();
+  renderMdps();
+  renderPlans();
+  showToast(`Site chargé : ${fi.bailleur || fi.adresse || 'Site'} ✓`);
+  goToPage(1);
+}
+
+function nouveauSiteVierge() {
+  ['fi_bailleur','fi_adresse','fi_ref','fi_type','fi_contact','fi_nbCam','fi_nbNvr','fi_notes'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  state.clefs = []; state.mdps = []; state.plans = [];
+  state.currentSiteId = null;
+  renderClefs(); renderMdps(); renderPlans();
+  goToPage(1);
+}
+
+function sauvegarderFicheSite() {
+  const fi = {
+    bailleur: document.getElementById('fi_bailleur')?.value || '',
+    adresse:  document.getElementById('fi_adresse')?.value || '',
+    ref:      document.getElementById('fi_ref')?.value || '',
+    type:     document.getElementById('fi_type')?.value || '',
+    contact:  document.getElementById('fi_contact')?.value || '',
+    nbCameras: document.getElementById('fi_nbCam')?.value || '',
+    nbNvr:    document.getElementById('fi_nbNvr')?.value || '',
+    notes:    document.getElementById('fi_notes')?.value || '',
+    clefs: state.clefs, mdps: state.mdps, plans: state.plans,
+  };
+  if (!fi.bailleur && !fi.adresse) { showToast('Renseigner le bailleur ou l\'adresse avant de sauvegarder.'); return; }
+  const sites = loadSites();
+  const nom = [fi.bailleur, fi.adresse].filter(Boolean).join(' — ');
+  if (state.currentSiteId) {
+    const idx = sites.findIndex(s => s.id === state.currentSiteId);
+    if (idx >= 0) { sites[idx] = { ...sites[idx], nom, ficheIdentite: fi, savedAt: new Date().toISOString() }; showToast('Fiche site mise à jour ✓'); }
+    else { sites.unshift({ id: state.currentSiteId, nom, ficheIdentite: fi, savedAt: new Date().toISOString() }); showToast('Fiche site sauvegardée ✓'); }
+  } else {
+    const newId = Date.now().toString();
+    state.currentSiteId = newId;
+    sites.unshift({ id: newId, nom, ficheIdentite: fi, savedAt: new Date().toISOString() });
+    showToast('Fiche site sauvegardée ✓');
+  }
+  saveSites(sites);
+}
+
+function supprimerSite(id, e) {
+  e.stopPropagation();
+  if (!confirm('Supprimer cette fiche site ? Les interventions dans l\'historique ne sont pas affectées.')) return;
+  const sites = loadSites().filter(s => s.id !== id);
+  saveSites(sites);
+  renderSiteSelectList();
+  showToast('Site supprimé');
 }
 
 // ==================== SAVE / LOAD ====================
@@ -3618,8 +4684,6 @@ function ouvrirIntervention(id, e) {
   const d = record.data;
   // Fill site fields
   const fields = {
-    baillerNom: d.site.bailleur, siteAdresse: d.site.adresse,
-    siteRef: d.site.ref, siteType: d.site.type,
     techNom: d.site.technicien, dateIntervention: d.site.date,
     heureDebut: d.site.heureDebut, heureFin: d.site.heureFin,
     ordreNum: d.site.ordre, contactSite: d.site.contact,
@@ -3646,18 +4710,18 @@ function ouvrirIntervention(id, e) {
   }, 50);
 
   toggleHistorique();
-  goToPage(1);
+  goToPage(2);
   showToast('Intervention chargée ✓');
 }
 
 function nouvelleIntervention() {
-  const bailleur = document.getElementById('baillerNom')?.value;
+  const bailleur = document.getElementById('fi_bailleur')?.value;
   const hasData = bailleur || state.cameras.length > 1 || state.nvrs.length > 1;
 
   if (hasData && !confirm('Démarrer une nouvelle intervention ?\n\nPense à sauvegarder dans l\'historique si tu veux conserver la saisie en cours.')) return;
 
   // Reset all fields
-  ['baillerNom','siteAdresse','siteRef','siteType','techNom','dateIntervention',
+  ['techNom','dateIntervention',
    'heureDebut','heureFin','ordreNum','contactSite','obsPrealables',
    'conclusion','actionsRetour','visaTech','visaClient'].forEach(id => {
     const el = document.getElementById(id);
@@ -3684,7 +4748,9 @@ function nouvelleIntervention() {
   document.getElementById('historiqueOverlay')?.classList.remove('open');
   document.getElementById('carteOverlay')?.classList.remove('open');
 
-  goToPage(1);
+  state.currentSiteId = null;
+  renderSiteSelectList();
+  goToPage(0);
   showToast('Nouveau formulaire prêt ✓');
 }
 
@@ -4109,8 +5175,6 @@ function ouvrirDepuisCarte(id) {
   if (!record) return;
   const d = record.data;
   const fields = {
-    baillerNom: d.site.bailleur, siteAdresse: d.site.adresse,
-    siteRef: d.site.ref, siteType: d.site.type,
     techNom: d.site.technicien, dateIntervention: d.site.date,
     heureDebut: d.site.heureDebut, heureFin: d.site.heureFin,
     ordreNum: d.site.ordre, contactSite: d.site.contact,
@@ -4127,7 +5191,7 @@ function ouvrirDepuisCarte(id) {
   state.currentInterventionId = record.id;
   renderNVRs(); renderCameras(); updateStats();
   toggleCarte();
-  goToPage(1);
+  goToPage(2);
   showToast('Diagnostic chargé depuis la carte ✓');
 }
 
@@ -4295,12 +5359,16 @@ function deletePhoto(e, photoKey, idx) {
 }
 
 function refreshAllPhotoZones() {
-  // Site
   renderPhotoZone('photos-site-general', 'site-general', 'Site', true);
-  // NVR zones
+  renderPhotoZone('photos-fi-facade', 'fi-facade', 'Façade', true);
+  renderPhotoZone('photos-fi-local', 'fi-local', 'Local', true);
   state.nvrs.forEach(nvr => {
     const cid = 'photos-nvr-' + nvr.id;
     if (document.getElementById(cid)) renderPhotoZone(cid, 'nvr-' + nvr.id, 'NVR', true);
+  });
+  state.plans.forEach(plan => {
+    const cid = 'photos-plan-' + plan.id;
+    if (document.getElementById(cid)) renderPhotoZone(cid, 'plan-' + plan.id, plan.nom || 'Plan', false);
   });
 }
 
@@ -4335,6 +5403,434 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Init historique state
 state.currentInterventionId = null;
+
+// ==================== PREFILL VISITE DEPUIS FICHE ====================
+function prefillInterventionFromFiche() {
+  // Remplir le résumé site en lecture seule
+  const resume = document.getElementById('siteResumePage2');
+  if (resume) {
+    const bailleur  = document.getElementById('fi_bailleur')?.value || '—';
+    const adresse   = document.getElementById('fi_adresse')?.value  || '—';
+    const ref       = document.getElementById('fi_ref')?.value       || '—';
+    const type      = document.getElementById('fi_type')?.value      || '—';
+    const contact   = document.getElementById('fi_contact')?.value   || '—';
+    const nbCam     = document.getElementById('fi_nbCam')?.value     || '—';
+    resume.innerHTML = `
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;">
+        <div style="font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:2px;">Bailleur social</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);">${bailleur}</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;">
+        <div style="font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:2px;">Adresse</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);">${adresse}</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;">
+        <div style="font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:2px;">Référence</div>
+        <div style="font-size:12px;font-weight:500;color:var(--text);font-family:var(--mono);">${ref}</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;">
+        <div style="font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:2px;">Type de site</div>
+        <div style="font-size:12px;font-weight:500;color:var(--text);">${type}</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;">
+        <div style="font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:2px;">Contact sur site</div>
+        <div style="font-size:12px;font-weight:500;color:var(--text);">${contact}</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;">
+        <div style="font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:2px;">Caméras</div>
+        <div style="font-size:12px;font-weight:500;color:var(--text);">${nbCam}</div>
+      </div>`;
+  }
+  // Date par défaut
+  const datEl = document.getElementById('dateIntervention');
+  if (datEl && !datEl.value) datEl.value = new Date().toISOString().split('T')[0];
+  const hDeb = document.getElementById('heureDebut');
+  if (hDeb && !hDeb.value) hDeb.value = new Date().toTimeString().slice(0, 5);
+}
+
+// ==================== TYPE DE VISITE ====================
+function setVisiteType(type) {
+  state.visiteType = type;
+  const bP = document.getElementById('btnPreventive');
+  const bC = document.getElementById('btnCorrective');
+  const lbl = document.getElementById('visiteTypeLabel');
+  const corrCard = document.getElementById('correctiveDetailsCard');
+  const prevCard = document.getElementById('preventiveDetailsCard');
+  if (!bP || !bC) return;
+  bP.className = 'visite-type-btn' + (type === 'preventive' ? ' active-preventive' : '');
+  bC.className = 'visite-type-btn' + (type === 'corrective' ? ' active-corrective' : '');
+  if (lbl) {
+    lbl.textContent = type === 'preventive' ? 'MAINTENANCE PRÉVENTIVE' : 'MAINTENANCE CORRECTIVE';
+    lbl.style.color = type === 'preventive' ? 'var(--green)' : '#ff6b35';
+    lbl.style.background = type === 'preventive' ? 'rgba(0,230,118,0.08)' : 'rgba(255,107,53,0.08)';
+    lbl.style.borderColor = type === 'preventive' ? 'rgba(0,230,118,0.2)' : 'rgba(255,107,53,0.2)';
+  }
+  if (corrCard) corrCard.style.display = type === 'corrective' ? 'block' : 'none';
+  if (prevCard) prevCard.style.display = type === 'preventive' ? 'block' : 'none';
+}
+
+// ==================== CLEFS ====================
+const TYPES_CLEF = [
+  'Porte entrée principale','Porte cave / sous-sol','Porte coffret NVR/DVR',
+  'Porte local technique','Porte parking','Portail','Porte immeuble A','Porte immeuble B',
+  'Porte immeuble C','Porte poubelles','Badge électronique','Autre'
+];
+
+function addClef() {
+  state.clefs.push({ id: Date.now() + Math.random(), type: '', ref: '', lieu: '', nbCopies: 1 });
+  renderClefs();
+}
+
+function removeClef(id) {
+  state.clefs = state.clefs.filter(c => c.id !== id);
+  renderClefs();
+}
+
+function updateClef(id, key, val) {
+  const c = state.clefs.find(x => x.id === id);
+  if (c) c[key] = val;
+}
+
+function renderClefs() {
+  const el = document.getElementById('clefsList');
+  if (!el) return;
+  if (!state.clefs.length) {
+    el.innerHTML = '<div style="color:var(--text2);font-size:13px;text-align:center;padding:12px;">Aucune clef — cliquez + Ajouter une clef</div>';
+    return;
+  }
+  el.innerHTML = state.clefs.map(c => `
+    <div class="clef-row">
+      <div class="field">
+        <label>Type</label>
+        <select onchange="updateClef(${c.id},'type',this.value)">
+          <option value="">-- Type --</option>
+          ${TYPES_CLEF.map(t => `<option ${c.type===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>N° / Référence</label>
+        <input type="text" value="${c.ref||''}" placeholder="CLF-001 / 3A..." onchange="updateClef(${c.id},'ref',this.value)" style="font-family:var(--mono);">
+      </div>
+      <div class="field">
+        <label>Localisation / Remarque</label>
+        <input type="text" value="${c.lieu||''}" placeholder="Ex: chez le gardien, boîte à clef..." onchange="updateClef(${c.id},'lieu',this.value)">
+      </div>
+      <div class="field">
+        <label>Nb copies</label>
+        <input type="number" value="${c.nbCopies||1}" min="1" onchange="updateClef(${c.id},'nbCopies',this.value)" style="font-family:var(--mono);text-align:center;">
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="removeClef(${c.id})">✕</button>
+    </div>
+  `).join('');
+}
+
+// ==================== MOTS DE PASSE ====================
+const TYPES_MDP = [
+  'NVR/DVR — Interface web','NVR/DVR — Application mobile','Caméra IP',
+  'Ordinateur de gestion','Switch réseau','VPN / Accès distant',
+  'Badge / Code alarme','Logiciel VMS','Autre'
+];
+
+function addMdp() {
+  state.mdps.push({ id: Date.now() + Math.random(), type: '', login: '', password: '', ip: '', commentaire: '', visible: false });
+  renderMdps();
+}
+
+function removeMdp(id) {
+  state.mdps = state.mdps.filter(m => m.id !== id);
+  renderMdps();
+}
+
+function updateMdp(id, key, val) {
+  const m = state.mdps.find(x => x.id === id);
+  if (m) m[key] = val;
+}
+
+function toggleMdpVisible(id) {
+  const m = state.mdps.find(x => x.id === id);
+  if (!m) return;
+  m.visible = !m.visible;
+  const inp = document.getElementById('pw-' + id);
+  const btn = document.getElementById('pweye-' + id);
+  if (inp) inp.type = m.visible ? 'text' : 'password';
+  if (btn) btn.textContent = m.visible ? '🙈' : '👁';
+}
+
+function renderMdps() {
+  const el = document.getElementById('mdpsList');
+  if (!el) return;
+  if (!state.mdps.length) {
+    el.innerHTML = '<div style="color:var(--text2);font-size:13px;text-align:center;padding:12px;">Aucun accès renseigné — cliquez + Ajouter</div>';
+    return;
+  }
+  el.innerHTML = state.mdps.map(m => `
+    <div class="mdp-row">
+      <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div class="field" style="margin:0;">
+          <label>Type d'équipement</label>
+          <select onchange="updateMdp(${m.id},'type',this.value)">
+            <option value="">-- Type --</option>
+            ${TYPES_MDP.map(t => `<option ${m.type===t?'selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field" style="margin:0;">
+          <label>IP / URL</label>
+          <input type="text" value="${m.ip||''}" placeholder="192.168.x.x" onchange="updateMdp(${m.id},'ip',this.value)" style="font-family:var(--mono);font-size:12px;">
+        </div>
+        <div class="field" style="margin:0;">
+          <label>Commentaire</label>
+          <input type="text" value="${m.commentaire||''}" placeholder="Ex: NVR parking niveau -1..." onchange="updateMdp(${m.id},'commentaire',this.value)">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;">
+        <div class="field" style="margin:0;">
+          <label>Login / Identifiant</label>
+          <input type="text" value="${m.login||''}" placeholder="admin" onchange="updateMdp(${m.id},'login',this.value)" style="font-family:var(--mono);">
+        </div>
+        <div class="field" style="margin:0;">
+          <label>Mot de passe</label>
+          <div class="pw-field-wrap">
+            <input type="password" id="pw-${m.id}" value="${m.password||''}" placeholder="••••••••" onchange="updateMdp(${m.id},'password',this.value)" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 36px 9px 12px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            <button class="pw-toggle" id="pweye-${m.id}" onclick="toggleMdpVisible(${m.id})" title="Afficher/masquer">👁</button>
+          </div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="removeMdp(${m.id})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ==================== PLANS ====================
+function addPlan() {
+  const id = Date.now() + Math.random();
+  state.plans.push({ id, nom: '', description: '', cameras: [] });
+  renderPlans();
+  // Render photo zone after DOM update
+  setTimeout(() => renderPhotoZone('photos-plan-' + id, 'plan-' + id, 'Plan', false), 50);
+}
+
+function removePlan(id) {
+  state.plans = state.plans.filter(p => p.id !== id);
+  renderPlans();
+}
+
+function updatePlan(id, key, val) {
+  const p = state.plans.find(x => x.id === id);
+  if (p) p[key] = val;
+}
+
+function addCamToPlan(planId) {
+  const p = state.plans.find(x => x.id === planId);
+  if (p) {
+    p.cameras.push({ id: Date.now() + Math.random(), nom: '', emplacement: '', ip: '', voie: '' });
+    renderPlans();
+  }
+}
+
+function removeCamFromPlan(planId, camId) {
+  const p = state.plans.find(x => x.id === planId);
+  if (p) p.cameras = p.cameras.filter(c => c.id !== camId);
+  renderPlans();
+}
+
+function updatePlanCam(planId, camId, key, val) {
+  const p = state.plans.find(x => x.id === planId);
+  if (p) { const c = p.cameras.find(x => x.id === camId); if (c) c[key] = val; }
+}
+
+function renderPlans() {
+  const el = document.getElementById('plansList');
+  if (!el) return;
+  if (!state.plans.length) {
+    el.innerHTML = '<div style="color:var(--text2);font-size:13px;text-align:center;padding:12px;">Aucun espace — cliquez + Ajouter un espace</div>';
+    return;
+  }
+  el.innerHTML = state.plans.map((plan, pi) => {
+    const camRows = plan.cameras.map((cam, ci) => `
+      <tr>
+        <td><span style="font-family:var(--mono);font-size:10px;color:var(--accent);">CAM-${String(ci+1).padStart(2,'0')}</span></td>
+        <td><input type="text" value="${cam.nom||''}" placeholder="CAM-${String(ci+1).padStart(2,'0')}" onchange="updatePlanCam(${plan.id},${cam.id},'nom',this.value)"></td>
+        <td><input type="text" value="${cam.emplacement||''}" placeholder="Angle nord, entrée hall…" onchange="updatePlanCam(${plan.id},${cam.id},'emplacement',this.value)"></td>
+        <td><input type="text" value="${cam.ip||''}" placeholder="192.168.x.x" onchange="updatePlanCam(${plan.id},${cam.id},'ip',this.value)" style="font-family:var(--mono);font-size:11px;"></td>
+        <td><input type="text" value="${cam.voie||''}" placeholder="CH01" onchange="updatePlanCam(${plan.id},${cam.id},'voie',this.value)" style="font-family:var(--mono);text-align:center;"></td>
+        <td style="text-align:center;"><button onclick="removeCamFromPlan(${plan.id},${cam.id})" style="background:none;border:none;color:var(--red);cursor:pointer;padding:2px 5px;">✕</button></td>
+      </tr>
+    `).join('');
+    return `
+    <div class="plan-block">
+      <div class="plan-head">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--accent);background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);border-radius:3px;padding:2px 7px;flex-shrink:0;">${String(pi+1).padStart(2,'0')}</span>
+        <input type="text" value="${plan.nom||''}" placeholder="Nom de l'espace (ex: Hall A, Parking B2, Cage escalier…)" onchange="updatePlan(${plan.id},'nom',this.value)" style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:14px;font-weight:600;padding:4px;outline:none;">
+        <input type="text" value="${plan.description||''}" placeholder="Description (optionnel)" onchange="updatePlan(${plan.id},'description',this.value)" style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text2);font-size:12px;padding:4px;outline:none;">
+        <button class="btn btn-danger btn-sm" onclick="removePlan(${plan.id})">✕</button>
+      </div>
+      <div style="padding:12px 14px;">
+        <div class="photo-zone-title" style="margin-bottom:8px;">📷 Photo / Plan de l'espace</div>
+        <div class="photo-grid" id="photos-plan-${plan.id}"></div>
+      </div>
+      <div style="padding:0 14px 14px;">
+        <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;font-weight:600;">Caméras dans cet espace (${plan.cameras.length})</div>
+        ${plan.cameras.length ? `
+        <table class="plan-cam-table">
+          <thead><tr>
+            <th style="width:50px">#</th>
+            <th>Nom / ID</th>
+            <th>Emplacement précis</th>
+            <th style="width:120px">Adresse IP</th>
+            <th style="width:60px">Voie NVR</th>
+            <th style="width:30px"></th>
+          </tr></thead>
+          <tbody>${camRows}</tbody>
+        </table>` : ''}
+        <button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="addCamToPlan(${plan.id})">+ Ajouter caméra</button>
+      </div>
+    </div>`;
+  }).join('');
+  // Render photo zones after DOM update
+  setTimeout(() => {
+    state.plans.forEach(plan => {
+      const cid = 'photos-plan-' + plan.id;
+      if (document.getElementById(cid)) renderPhotoZone(cid, 'plan-' + plan.id, plan.nom || 'Plan', false);
+    });
+  }, 50);
+}
+
+// ==================== TRAVAUX RÉALISÉS ====================
+const TYPES_TRAVAUX = ['Nettoyage optique','Recâblage','Réorientation caméra','Reboot PoE','Remplacement connecteur','Revissage fixation','Correction horodatage','Mise à jour firmware','Remplacement caméra','Remplacement HDD','Autre'];
+
+function addTravailRealise() {
+  state.travauxRealises.push({ id: Date.now() + Math.random(), type: '', description: '', cam: '' });
+  renderTravauxRealises();
+}
+
+function removeTravailRealise(id) {
+  state.travauxRealises = state.travauxRealises.filter(t => t.id !== id);
+  renderTravauxRealises();
+}
+
+function updateTravailRealise(id, key, val) {
+  const t = state.travauxRealises.find(x => x.id === id);
+  if (t) t[key] = val;
+}
+
+function renderTravauxRealises() {
+  const el = document.getElementById('travauxRealisesList');
+  if (!el) return;
+  if (!state.travauxRealises.length) {
+    el.innerHTML = '<div style="color:var(--text2);font-size:13px;text-align:center;padding:12px;">Aucun travail saisi</div>';
+    return;
+  }
+  el.innerHTML = state.travauxRealises.map(t => `
+    <div class="travail-row" style="border-left:3px solid var(--green);">
+      <div class="field">
+        <label>Type d'action</label>
+        <select onchange="updateTravailRealise(${t.id},'type',this.value)">
+          <option value="">-- Type --</option>
+          ${TYPES_TRAVAUX.map(tt => `<option ${t.type===tt?'selected':''}>${tt}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <input type="text" value="${t.description||''}" placeholder="Détails de l'action réalisée…" onchange="updateTravailRealise(${t.id},'description',this.value)">
+      </div>
+      <div class="field">
+        <label>Caméra / Équipement</label>
+        <input type="text" value="${t.cam||''}" placeholder="CAM-01, NVR-1…" onchange="updateTravailRealise(${t.id},'cam',this.value)" style="font-family:var(--mono);">
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="removeTravailRealise(${t.id})">✕</button>
+    </div>
+  `).join('');
+}
+
+// ==================== TRAVAUX PLANIFIÉS ====================
+const NIVEAUX_URGENCE = ['Urgent (< 1 semaine)','Moyen (< 1 mois)','Normal (< 3 mois)','À planifier'];
+
+function addTravailPlanifie() {
+  state.travauxPlanifies.push({ id: Date.now() + Math.random(), description: '', urgence: '', cam: '' });
+  renderTravauxPlanifies();
+}
+
+function removeTravailPlanifie(id) {
+  state.travauxPlanifies = state.travauxPlanifies.filter(t => t.id !== id);
+  renderTravauxPlanifies();
+}
+
+function updateTravailPlanifie(id, key, val) {
+  const t = state.travauxPlanifies.find(x => x.id === id);
+  if (t) t[key] = val;
+}
+
+function renderTravauxPlanifies() {
+  const el = document.getElementById('travauxPlanifiesList');
+  if (!el) return;
+  if (!state.travauxPlanifies.length) {
+    el.innerHTML = '<div style="color:var(--text2);font-size:13px;text-align:center;padding:12px;">Aucun travail planifié</div>';
+    return;
+  }
+  el.innerHTML = state.travauxPlanifies.map(t => `
+    <div class="travail-row" style="border-left:3px solid var(--orange);">
+      <div class="field">
+        <label>Travail à effectuer</label>
+        <input type="text" value="${t.description||''}" placeholder="Décrire l'action à planifier…" onchange="updateTravailPlanifie(${t.id},'description',this.value)">
+      </div>
+      <div class="field">
+        <label>Urgence</label>
+        <select onchange="updateTravailPlanifie(${t.id},'urgence',this.value)">
+          <option value="">-- Niveau --</option>
+          ${NIVEAUX_URGENCE.map(u => `<option ${t.urgence===u?'selected':''}>${u}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>Caméra / Zone</label>
+        <input type="text" value="${t.cam||''}" placeholder="CAM-03, Parking…" onchange="updateTravailPlanifie(${t.id},'cam',this.value)" style="font-family:var(--mono);">
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="removeTravailPlanifie(${t.id})">✕</button>
+    </div>
+  `).join('');
+}
+
+// ==================== MATÉRIEL À COMMANDER ====================
+function addMateriel() {
+  state.materielCommande.push({ id: Date.now() + Math.random(), designation: '', ref: '', qte: 1 });
+  renderMateriel();
+}
+
+function removeMateriel(id) {
+  state.materielCommande = state.materielCommande.filter(m => m.id !== id);
+  renderMateriel();
+}
+
+function updateMateriel(id, key, val) {
+  const m = state.materielCommande.find(x => x.id === id);
+  if (m) m[key] = val;
+}
+
+function renderMateriel() {
+  const el = document.getElementById('materielList');
+  if (!el) return;
+  if (!state.materielCommande.length) {
+    el.innerHTML = '<div style="color:var(--text2);font-size:13px;text-align:center;padding:12px;">Aucun matériel à commander</div>';
+    return;
+  }
+  el.innerHTML = state.materielCommande.map(m => `
+    <div class="mat-row">
+      <div class="field">
+        <label>Désignation</label>
+        <input type="text" value="${m.designation||''}" placeholder="Caméra dôme Hikvision, câble RJ45…" onchange="updateMateriel(${m.id},'designation',this.value)">
+      </div>
+      <div class="field">
+        <label>Qté</label>
+        <input type="number" value="${m.qte||1}" min="1" onchange="updateMateriel(${m.id},'qte',this.value)" style="font-family:var(--mono);text-align:center;">
+      </div>
+      <div class="field">
+        <label>Référence / Commentaire</label>
+        <input type="text" value="${m.ref||''}" placeholder="Réf. fournisseur, urgence…" onchange="updateMateriel(${m.id},'ref',this.value)" style="font-family:var(--mono);font-size:12px;">
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="removeMateriel(${m.id})">✕</button>
+    </div>
+  `).join('');
+}
+
 </script>
 </body>
 </html>
